@@ -5,11 +5,58 @@ import json
 import logging
 import re
 import emission.core.get_database as edb
+from __future__ import print_function
+import argparse
+import pprint
 from datetime import datetime
 from uuid import UUID
 ACCESS_TOKEN = 'AIzaSyAbnpsty2SAzEX9s1VVIdh5pTHUPMjn3lQ' #GOOGLE MAPS ACCESS TOKEN
 JACK_TOKEN = 'AIzaSyAXG_8bZvAAACChc26JC6SFzhuWysRqQPo'
-YELP_TOKEN = 
+#YELP API ACCESS KEY
+YELP_API_KEY = 'jBC0box-WQr7jvQvXlI9sJuw17wfN9AYFMnu5ebxsYkgQoKTjjIRD0I_tAePUasbaIbXj28cmj4nUBDHrVxtrfHU2l6TM4E61Kk3EVeSbLZsxStLxkAVlkHK9xJ6W3Yx'
+
+# This client code can run on Python 2.x or 3.x.  Your imports can be
+# simpler if you only need one of those.
+try:
+    # For Python 3.0 and later
+    from urllib.error import HTTPError
+    from urllib.parse import quote
+    from urllib.parse import urlencode
+except ImportError:
+    # Fall back to Python 2's urllib2 and urllib
+    from urllib2 import HTTPError
+    from urllib import quote
+    from urllib import urlencode
+
+#S2: If user, found a higher reviewed restaurant closer to the trip's initial point, then suggest that new restaurant. 
+
+API_HOST = 'https://api.yelp.com'
+SEARCH_PATH = '/v3/businesses/search'
+BUSINESS_PATH = '/v3/businesses/' 
+
+def request_yelp(host, path, api_key, url_params=None):
+    url_params =  url_params or {}
+    url = '{0}{1}'.format(host, quote(path.encode('utf8')))
+    headers = {
+        'Authorization': 'Bearer %s' % api_key,
+    }
+    print(u'Querying {0} ...'.format(url))
+    response = requests.request('GET', url, headers=headers, params=url_params)
+    return response.json()
+
+def search(api_key, term, location):
+    url_params = {
+        'term': term.replace(' ', '+'),
+        'location': location.replace(' ', '+'),
+        'limit': SEARCH_LIMIT
+    }
+    return request_yelp(API_HOST, SEARCH_PATH, api_key, url_params=url_params)
+
+def business_reviews(api_key, business_id):
+    business_path = BUSINESS_PATH + business_id
+
+    return request(API_HOST, business_path, api_key)
+
 
 #S1: If user could've taken a more sustainable transportation route, then suggest that sustainable
 #transportation route. 
@@ -167,4 +214,3 @@ def calculate_single_suggestion(uuid):
                 continue
     return return_obj
 
-#
