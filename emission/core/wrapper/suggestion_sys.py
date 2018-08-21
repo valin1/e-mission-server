@@ -57,6 +57,48 @@ def business_reviews(api_key, business_id):
 
     return request(API_HOST, business_path, api_key)
 
+def query_api(term, location):
+    response = search(API_KEY, term, location)
+
+    businesses = response.get('businesses')
+
+    if not businesses:
+        print(u'No businesses for {0} in {1} found.'.format(term, location))
+        return
+
+    business_id = businesses[0]['id']
+
+    print(u'{0} businesses found, querying business info ' \
+        'for the top result "{1}" ...'.format(
+            len(businesses), business_id))
+    response = get_business(API_KEY, business_id)
+
+    print(u'Result for business "{0}" found:'.format(business_id))
+    pprint.pprint(response, indent=2)
+
+#Calculate the distance and reviews, before outputting a suggestion. 
+
+def calculate_yelp_suggestion(uuid):
+    return_obj = { 'message': "Good job on choosing an environmentally closer location! No suggestion to show.",
+    'savings': "0", 'start_lat' : '0.0', 'start_lon' : '0.0',
+    'end_lat' : '0.0', 'end_lon' : '0.0', 'method' : 'bike'}
+    all_users = pd.DataFrame(list(edb.get_uuid_db().find({}, {"uuid": 1, "_id": 0})))
+    user_id = all_users.iloc[all_users[all_users.uuid == uuid].index.tolist()[0]].uuid
+    time_series = esta.TimeSeries.get_time_series(user_id)
+    cleaned_sections = time_series.get_data_df("analysis/inferred_section", time_query = None)
+    for i in range(len(cleaned_sections) - 1, -1, -1):
+        counter -= 1
+    #Check if businesses are of the same category. 
+        start_loc = cleaned_sections.iloc[i]["start_loc"]["coordinates"]
+        start_lat = str(start_loc[0])
+        start_lon = str(start_loc[1])
+        end_loc = cleaned_sections.iloc[i]["end_loc"]["coordinates"]
+        end_lat = str(end_loc[0])
+        end_lon = str(end_loc[1])
+        distance_in_miles = cleaned_sections.iloc[i]["distance"] * 0.000621371
+
+
+
 
 #S1: If user could've taken a more sustainable transportation route, then suggest that sustainable
 #transportation route. 
