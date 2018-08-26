@@ -14,7 +14,7 @@ ACCESS_TOKEN = 'AIzaSyAbnpsty2SAzEX9s1VVIdh5pTHUPMjn3lQ' #GOOGLE MAPS ACCESS TOK
 JACK_TOKEN = 'AIzaSyAXG_8bZvAAACChc26JC6SFzhuWysRqQPo'
 #YELP API ACCESS KEY
 YELP_API_KEY = 'jBC0box-WQr7jvQvXlI9sJuw17wfN9AYFMnu5ebxsYkgQoKTjjIRD0I_tAePUasbaIbXj28cmj4nUBDHrVxtrfHU2l6TM4E61Kk3EVeSbLZsxStLxkAVlkHK9xJ6W3Yx'
-
+NOM_TOKEN = 
 # This client code can run on Python 2.x or 3.x.  Your imports can be
 # simpler if you only need one of those.
 try:
@@ -76,6 +76,21 @@ def query_api(term, location):
     print(u'Result for business "{0}" found:'.format(business_id))
     pprint.pprint(response, indent=2)
 
+#Obtain business name through Yelp's API
+def get_business_id(api_key, lat, lon):
+    url_params = {
+        'location': lat + ',' + lon
+    }
+    #Very broad, latitudes and longitudes given, cannot exactly pinpoint the exact location
+    return request(API_HOST, SEARCH_PATH, api_key, url_params=url_params)
+
+
+
+#Send Shankari code snippet
+#Write script to find average amount of trips per user
+#Random 5 business matches
+
+
 #Calculate the distance and reviews, before outputting a suggestion. 
 
 def calculate_yelp_suggestion(uuid):
@@ -96,9 +111,45 @@ def calculate_yelp_suggestion(uuid):
         end_lat = str(end_loc[0])
         end_lon = str(end_loc[1])
         distance_in_miles = cleaned_sections.iloc[i]["distance"] * 0.000621371
-
-
-
+"""
+Updated return address from location FUNCTION to prevent any conflicts, from previous semester's code on their suggestion 
+mode, added another RETURN parameter (returns the business name and location), makes it easier for Yelp's API to search
+for businesses
+"""
+def updated_return_address_from_location (location='0,0'):
+    if not re.compile('^(\-?\d+(\.\d+)?),\s*(\-?\d+(\.\d+)?)$').match(location):
+        raise ValueError('Location Invalid')
+    base_url = 'https://maps.googleapis.com/maps/api/geocode/json?'
+    latlng = 'latlng=' + location
+    try:
+        #This try block is for our first 150,000 requests. If we exceed this, use Jack's Token.
+        key_string = '&key=' + ACCESS_TOKEN
+        url = base_url + latlng + key_string #Builds the url
+        result = requests.get(url).json() #Gets google maps json file
+        cleaned = result['results'][0]['address_components']
+        #Address to check against value of check_against_business_location
+        chk = cleaned[0]['long_name'] + ' ' + cleaned[1]['long_name'] + ', ' + cleaned[3]['long_name']
+        business_tuple = check_against_business_location(location, chk)
+        if business_tuple[0]: #If true, the lat, lon matches a business location and we return business name
+            return business_tuple[1], cleaned[3]['short_name']
+        else: #otherwise, we just return the address
+            return cleaned[0]['long_name'] + ' ' + cleaned[1]['short_name'] + ', ' + cleaned[3]['short_name']
+    except:
+        try:
+            #Use Jack's Token in case of some invalid request problem with other API Token
+            key_string = '&key=' + JACK_TOKEN
+            url = base_url + latlng + key_string #Builds the url
+            result = requests.get(url).json() #Gets google maps json file
+            cleaned = result['results'][0]['address_components']
+            #Address to check against value of check_against_business_location
+            chk = cleaned[0]['long_name'] + ' ' + cleaned[1]['long_name'] + ', ' + cleaned[3]['long_name']
+            business_tuple = check_against_business_location(location, chk)
+            if business_tuple[0]: #If true, the lat, lon matches a business location and we return business name
+                return business_tuple[1]
+            else: #otherwise, we just return the address
+                return cleaned[0]['long_name'] + ' ' + cleaned[1]['short_name'] + ', ' + cleaned[3]['short_name']
+        except:
+            raise ValueError("Something went wrong")
 
 #S1: If user could've taken a more sustainable transportation route, then suggest that sustainable
 #transportation route. 
