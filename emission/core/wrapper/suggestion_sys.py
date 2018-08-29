@@ -241,6 +241,8 @@ def calculate_yelp_suggestion(location = '0,0'):
                 #'Coordinates' come out as two elements, latitude and longitude
                 business_locations[q['name']] = q['location']
 
+    print('help')
+
 
 
 def distance(address1, address2):
