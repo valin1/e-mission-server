@@ -241,19 +241,21 @@ def calculate_yelp_suggestion(location = '0,0'):
                 #'Coordinates' come out as two elements, latitude and longitude
                 business_locations[q['name']] = q['location']
 
-    print('help')
 
 
-
+'''
+Function that calculates distances between the original starting point and potential business locations, using addresses compared to latitudes and longitudes
+'''
 def distance(address1, address2):
     address1 = address1.replace(' ', '+')
     address2 = address2.replace(' ', '+')
 
     url = 'http://www.mapquestapi.com/directions/v2/route?key=' + MAPQUEST_KEY + '&from=' + address1 + '&to=' + address2
     response = requests.get(url)
-    print(url)
     return response.json()['route']['distance']
-#Calculate for any businesses around location
+
+
+
 
 
 '''
