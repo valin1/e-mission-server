@@ -76,6 +76,7 @@ def query_api(term, location):
     print(u'Result for business "{0}" found:'.format(business_id))
     pprint.pprint(response, indent=2)
 
+
 #Obtain business name through Yelp's API
 def get_business_id(api_key, lat, lon):
     url_params = {
@@ -84,7 +85,11 @@ def get_business_id(api_key, lat, lon):
     #Very broad, latitudes and longitudes given, cannot exactly pinpoint the exact location
     return request(API_HOST, SEARCH_PATH, api_key, url_params=url_params)
 
+def average_review_start_loc(location = '0,0'):
+    business_name, city = return_address_from_location(location)
+    return business_reviews(API_KEY, business_name + '-' + city)['rating']
 
+def category_of_business(location = '0,0'):
 
 #Send Shankari code snippet
 #Write script to find average amount of trips per user
@@ -151,6 +156,46 @@ def updated_return_address_from_location (location='0,0'):
         except:
             raise ValueError("Something went wrong")
 
+def match_business_address(address):
+    business_path = SEARCH_PATH
+    url_params = {
+        'location': address.replace(' ', '+')
+    }
+    return request(API_HOST, business_path, API_KEY, url_params)
+'''
+Function to find the review of the original location of the end point of a trip
+'''
+def review_start_loc(location = '0,0'):
+    try:
+        #Off at times if the latlons are of a location that takes up a small spot, especially boba shops
+        business_name, city = updated_return_address_from_location(location)
+        #print(business_reviews(API_KEY, business_name.replace(' ', '-') + '-' + city))
+        return business_reviews(API_KEY, business_name.replace(' ', '-') + '-' + city)['rating']
+    except:
+        try:
+            #This EXCEPT part may error, because it grabs a list of businesses instead of matching the address to a business
+            address = updated_return_address_from_location(location)
+            return match_business_address(address)
+        except:
+            raise ValueError("Something went wrong")
+    
+'''
+Function that RETURNS a list of categories that the business falls into
+'''
+def category_of_business(location = '0,0'):
+    try:
+        #Off at times if the latlons are of a location that takes up a small spot, especially boba shops
+        business_name, city = updated_return_address_from_location(location)
+        categories = []
+        for c in business_reviews(API_KEY, business_name.replace(' ', '-') + '-' + city)['categories']:
+            categories.append(c['alias'])
+        return categories
+    except:
+        try:
+            address = updated_return_address_from_location(location)
+            return match_business_address(address)
+        except:
+            raise ValueError("Something went wrong")
 #S1: If user could've taken a more sustainable transportation route, then suggest that sustainable
 #transportation route. 
 
