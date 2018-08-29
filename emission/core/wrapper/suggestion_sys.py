@@ -85,9 +85,19 @@ def get_business_id(api_key, lat, lon):
     #Very broad, latitudes and longitudes given, cannot exactly pinpoint the exact location
     return request(API_HOST, SEARCH_PATH, api_key, url_params=url_params)
 
-def average_review_start_loc(location = '0,0'):
-    business_name, city = return_address_from_location(location)
-    return business_reviews(API_KEY, business_name + '-' + city)['rating']
+def review_start_loc(location = '0,0'):
+    try:
+        #Off at times if the latlons are of a location that takes up a small spot, especially boba shops
+        business_name, city = return_address_from_location(location)
+        #print(business_reviews(API_KEY, business_name.replace(' ', '-') + '-' + city))
+        return business_reviews(API_KEY, business_name.replace(' ', '-') + '-' + city)['rating']
+    except:
+        try:
+            #This EXCEPT part may error, because it grabs a list of businesses instead of matching the address to a business
+            address = return_address_from_location(location)
+            return match_business_address(address)
+        except:
+            raise ValueError("Something went wrong")
 
 def category_of_business(location = '0,0'):
 
@@ -196,6 +206,74 @@ def category_of_business(location = '0,0'):
             return match_business_address(address)
         except:
             raise ValueError("Something went wrong")
+
+
+'''
+Function that RETURNS TRUE or FALSE if the categories of the two points match 
+'''
+def match_category(location0 = '0,0', location1 = '0,0'):
+    categories0 = category_of_business(location0)
+    categories1 = category_of_business(location1)
+    for category in categories0:
+        if category in categories1:
+            return True
+    return False
+
+'''
+Test Function without connecting with the server
+'''
+def calculate_yelp_suggestion(location = '0,0'):
+    endpoint = location
+    #USING A DUMMY ADDRESS AS PROOF OF CONCEPT IN TERMS OF CALCULATING THE DISTANCE
+    dummy = '2700 Hearst Ave, Berkeley, CA'
+    #Check for category of the location
+    endpoint_categories = category_of_business(location)
+    similar_businesses = {}
+    business_locations = {}
+    city = updated_return_address_from_location(location)[1]
+    address = updated_return_address_from_location(location)[2]
+    location_review = review_start_loc(location)
+    for categor in endpoint_categories:
+        queried_bus = search(API_KEY, categor, city)['businesses']
+        for q in queried_bus:
+            if q['rating'] >= location_review:
+                similar_businesses[q['name']] = q['rating']
+                #'Coordinates' come out as two elements, latitude and longitude
+                business_locations[q['name']] = q['location']
+
+
+
+def distance(address1, address2):
+    address1 = address1.replace(' ', '+')
+    address2 = address2.replace(' ', '+')
+
+    url = 'http://www.mapquestapi.com/directions/v2/route?key=' + MAPQUEST_KEY + '&from=' + address1 + '&to=' + address2
+    response = requests.get(url)
+    print(url)
+    return response.json()['route']['distance']
+#Calculate for any businesses around location
+
+
+'''
+FUNCTION THAT SHOULD BE INCLUDED IN SUGGESTION_SYS.PY
+'''
+def calculate_yelp_server_suggestion(uuid):
+    #Given a single UUID, create a suggestion for them
+    return_obj = { 'message': "Good job walking and biking! No suggestion to show.",
+    'savings': "0", 'start_lat' : '0.0', 'start_lon' : '0.0',
+    'end_lat' : '0.0', 'end_lon' : '0.0', 'method' : 'bike'}
+    all_users = pd.DataFrame(list(edb.get_uuid_db().find({}, {"uuid": 1, "_id": 0})))
+    user_id = all_users.iloc[all_users[all_users.uuid == uuid].index.tolist()[0]].uuid
+    time_series = esta.TimeSeries.get_time_series(user_id)
+    cleaned_sections = time_series.get_data_df("analysis/inferred_section", time_query = None)
+    suggestion_trips = edb.get_suggestion_trips_db()
+    #Go in reverse order because we check by most recent trip
+
+    if len(cleaned_sections) == 0:
+        return_obj['message'] = 'Suggestions will appear once you start taking trips!'
+        return return_obj
+
+
 #S1: If user could've taken a more sustainable transportation route, then suggest that sustainable
 #transportation route. 
 
