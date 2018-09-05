@@ -39,6 +39,9 @@ def get_section_db():
     # current_db=MongoClient('localhost').Stage_database
     Sections= _get_current_db().Stage_Sections
     return Sections
+    
+def get_suggestion_trips_db():
+    return _get_current_db().SuggestionSys
 
 def get_trip_db():
     # current_db=MongoClient().Stage_database
