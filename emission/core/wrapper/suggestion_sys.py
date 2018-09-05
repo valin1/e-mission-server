@@ -137,7 +137,7 @@ def check_against_business_location(location='0, 0', address = ''):
         except:
             raise ValueError("Something went wrong")
 
-def return_address_from_location(location='0,0'):
+def return_address_from_location_yelp(location='0,0'):
     """
     Creates a Google Maps API call that returns the addresss given a lat, lon
     """
@@ -189,13 +189,13 @@ Function to find the review of the original location of the end point of a trip
 def review_start_loc(location = '0,0'):
     try:
         #Off at times if the latlons are of a location that takes up a small spot, especially boba shops
-        business_name, city, address = return_address_from_location(location)
+        business_name, city, address = return_address_from_location_yelp(location)
         #print(business_reviews(API_KEY, business_name.replace(' ', '-') + '-' + city))
         return business_reviews(API_KEY, business_name.replace(' ', '-') + '-' + city)['rating']
     except:
         try:
             #This EXCEPT part may error, because it grabs a list of businesses instead of matching the address to a business
-            address = return_address_from_location(location)
+            address = return_address_from_location_yelp(location)
             return match_business_address(address)
         except:
             raise ValueError("Something went wrong")
@@ -206,14 +206,14 @@ Function that RETURNS a list of categories that the business falls into
 def category_of_business(location = '0,0'):
     try:
         #Off at times if the latlons are of a location that takes up a small spot, especially boba shops
-        business_name, city, address = return_address_from_location(location)
+        business_name, city, address = return_address_from_location_yelp(location)
         categories = []
         for c in business_reviews(API_KEY, business_name.replace(' ', '-') + '-' + city)['categories']:
             categories.append(c['alias'])
         return categories
     except:
         try:
-            address = return_address_from_location(location)
+            address = return_address_from_location_yelp(location)
             return match_business_address(address)
         except:
             raise ValueError("Something went wrong")
@@ -241,8 +241,8 @@ def calculate_yelp_suggestion(location = '0,0'):
     #Check for category of the location
     endpoint_categories = category_of_business(location)
     business_locations = {}
-    city = return_address_from_location(location)[1]
-    address = return_address_from_location(location)[2]
+    city = return_address_from_location_yelp(location)[1]
+    address = return_address_from_location_yelp(location)[2]
     comp_distance = distance(dummy, location)
     location_review = review_start_loc(location)
     ratings_bus = {}
@@ -312,7 +312,7 @@ def calculate_yelp_server_suggestion(uuid):
     user_id = all_users.iloc[all_users[all_users.uuid == uuid].index.tolist()[0]].uuid
     time_series = esta.TimeSeries.get_time_series(user_id)
     cleaned_sections = time_series.get_data_df("analysis/inferred_section", time_query = None)
-    suggestion_trips = edb.get_suggestion_trips_db()
+    # suggestion_trips = edb.get_suggestion_trips_db()
     #Go in reverse order because we check by most recent trip
     counter = 40
     if len(cleaned_sections) == 0:
@@ -334,16 +334,16 @@ def calculate_yelp_server_suggestion(uuid):
         start_lat_lon = start_lat + ',' + start_lon
         trip_id = cleaned_sections.iloc[i]['trip_id']
         # tripDict = suggestion_trips.find_one({'uuid': uuid})
-        print(tripDict)
+        # print(tripDict)
         end_loc = cleaned_sections.iloc[i]["end_loc"]["coordinates"]
         end_lat = str(end_loc[0])
         end_lon = str(end_loc[1])
         end_lat_lon = end_lat + ',' + end_lon
         endpoint_categories = category_of_business(end_lat_lon)
         business_locations = {}
-        begin_address = return_address_from_location(start_lat_lon)[2]
-        city = return_address_from_location(end_lat_lon)[1]
-        address = return_address_from_location(end_lat_lon)[2]
+        begin_address = return_address_from_location_yelp(start_lat_lon)[2]
+        city = return_address_from_location_yelp(end_lat_lon)[1]
+        address = return_address_from_location_yelp(end_lat_lon)[2]
         #ALREADY CALCULATED BY DISTANCE_IN_MILES
         #comp_distance = distance(dummy, end_lat_lon)
         location_review = review_start_loc(end_lat_lon)
