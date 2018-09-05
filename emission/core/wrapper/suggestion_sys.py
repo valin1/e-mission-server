@@ -333,7 +333,7 @@ def calculate_yelp_server_suggestion(uuid):
         start_lon = str(start_loc[1])
         start_lat_lon = start_lat + ',' + start_lon
         trip_id = cleaned_sections.iloc[i]['trip_id']
-        tripDict = suggestion_trips.find_one({'uuid': uuid})
+        # tripDict = suggestion_trips.find_one({'uuid': uuid})
         print(tripDict)
         end_loc = cleaned_sections.iloc[i]["end_loc"]["coordinates"]
         end_lat = str(end_loc[0])
