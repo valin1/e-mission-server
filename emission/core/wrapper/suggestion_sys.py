@@ -329,15 +329,15 @@ def calculate_yelp_server_suggestion(uuid):
         distance_in_miles = cleaned_sections.iloc[i]["distance"] * 0.000621371
         mode = cleaned_sections.iloc[i]["sensed_mode"]
         start_loc = cleaned_sections.iloc[i]["start_loc"]["coordinates"]
-        start_lat = str(start_loc[0])
-        start_lon = str(start_loc[1])
+        start_lon = str(start_loc[0])
+        start_lat = str(start_loc[1])
         start_lat_lon = start_lat + ',' + start_lon
         trip_id = cleaned_sections.iloc[i]['trip_id']
         # tripDict = suggestion_trips.find_one({'uuid': uuid})
         # print(tripDict)
         end_loc = cleaned_sections.iloc[i]["end_loc"]["coordinates"]
-        end_lat = str(end_loc[0])
-        end_lon = str(end_loc[1])
+        end_lon = str(end_loc[0])
+        end_lat = str(end_loc[1])
         end_lat_lon = end_lat + ',' + end_lon
         endpoint_categories = category_of_business(end_lat_lon)
         business_locations = {}
