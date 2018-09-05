@@ -322,90 +322,72 @@ def calculate_yelp_server_suggestion(uuid):
         counter -=1 
         if counter < 0:
             return return_obj
+        #NOT QUITE SURE WHAT THIS LINE OF CODE IS SUPPOSED TO DO?
         if cleaned_sections.iloc[i]["end_ts"] - cleaned_sections.iloc[i]["start_ts"] < 5 * 60:
             continue
-
-
-
-
-# def calculate_single_suggestion(uuid):
-#     #Given a single UUID, create a suggestion for them
-#     return_obj = { 'message': "Good job walking and biking! No suggestion to show.",
-#     'savings': "0", 'start_lat' : '0.0', 'start_lon' : '0.0',
-#     'end_lat' : '0.0', 'end_lon' : '0.0', 'method' : 'bike'}
-#     all_users = pd.DataFrame(list(edb.get_uuid_db().find({}, {"uuid": 1, "_id": 0})))
-#     user_id = all_users.iloc[all_users[all_users.uuid == uuid].index.tolist()[0]].uuid
-#     time_series = esta.TimeSeries.get_time_series(user_id)
-#     cleaned_sections = time_series.get_data_df("analysis/inferred_section", time_query = None)
-#     suggestion_trips = edb.get_suggestion_trips_db()
-#     #Go in reverse order because we check by most recent trip
-#     counter = 40
-#     if len(cleaned_sections) == 0:
-#         return_obj['message'] = 'Suggestions will appear once you start taking trips!'
-#         return return_obj
-#     for i in range(len(cleaned_sections) - 1, -1, -1):
-#         counter -= 1
-#         if counter < 0:
-#             #Iterate 20 trips back
-#             return return_obj
-#         if cleaned_sections.iloc[i]["end_ts"] - cleaned_sections.iloc[i]["start_ts"] < 5 * 60:
-#             continue
-#         distance_in_miles = cleaned_sections.iloc[i]["distance"] * 0.000621371
-#         mode = cleaned_sections.iloc[i]["sensed_mode"]
-#         start_loc = cleaned_sections.iloc[i]["start_loc"]["coordinates"]
-#         start_lat = str(start_loc[0])
-#         start_lon = str(start_loc[1])
-#         trip_id = cleaned_sections.iloc[i]['trip_id']
-#         tripDict = suggestion_trips.find_one({'uuid': uuid})
-#         print(tripDict)
-#         end_loc = cleaned_sections.iloc[i]["end_loc"]["coordinates"]
-#         end_lat = str(end_loc[0])
-#         end_lon = str(end_loc[1])
-#         if mode == 5 and distance_in_miles >= 5 and distance_in_miles <= 15:
-#             logging.debug("15 >= distance >= 5 so I'm considering distance: " + str(distance_in_miles))
-#             #Suggest bus if it is car and distance between 5 and 15
-#             default_message = return_obj['message']
-#             try:
-#                 message = "Try public transportation from " + return_address_from_location(start_lon + "," + start_lat) + \
-#                 " to " + return_address_from_location(end_lon + "," + end_lat) + " (tap me to view)"
-#                 #savings per month, .465 kg co2/mile for car, 0.14323126 kg co2/mile for bus
-#                 savings = str(int(distance_in_miles * 30 * .465 - 0.14323126 * distance_in_miles * 30))
-#                 return {'message' : message, 'savings' : savings, 'start_lat' : start_lat,
-#                 'start_lon' : start_lon, 'end_lat' : end_lat, 'end_lon' : end_lon, 'method': 'public'}
-#                 insert_into_db(tripDict, trip_id, suggestion_trips, uuid)
-#                 break
-#             except ValueError as e:
-#                 return_obj['message'] = default_message
-#                 continue
-#         elif (mode == 5 or mode == 3 or mode == 4) and (distance_in_miles < 5 and distance_in_miles >= 1):
-#             logging.debug("5 > distance >= 1 so I'm considering distance: " + str(distance_in_miles))
-#             #Suggest bike if it is car/bus/train and distance between 5 and 1
-#             try:
-#                 message = "Try biking from " + return_address_from_location(start_lon + "," + start_lat) + \
-#                 " to " + return_address_from_location(end_lon + "," + end_lat) + " (tap me to view)"
-#                 savings = str(int(distance_in_miles * 30 * .465))  #savings per month, .465 kg co2/mile
-#                 insert_into_db(tripDict, trip_id, suggestion_trips, uuid)
-#                 return {'message' : message, 'savings' : savings, 'start_lat' : start_lat,
-#                 'start_lon' : start_lon, 'end_lat' : end_lat, 'end_lon' : end_lon, 'method': 'bike'}
-#                 break
-#             except:
-#                 continue
-#         elif (mode == 5 or mode == 3 or mode == 4) and (distance_in_miles < 1):
-#             logging.debug("1 > distance so I'm considering distance: " + str(distance_in_miles))
-#             #Suggest walking if it is car/bus/train and distance less than 1
-#             try:
-#                 message = "Try walking/biking from " + return_address_from_location(start_lon + "," + start_lat) + \
-#                 " to " + return_address_from_location(end_lon + "," + end_lat) + " (tap me to view)"
-#                 savings = str(int(distance_in_miles * 30 * .465)) #savings per month, .465 kg co2/mile
-#                 insert_into_db(tripDict, trip_id, suggestion_trips, uuid)
-#                 return {'message' : message, 'savings' : savings, 'start_lat' : start_lat,
-#                 'start_lon' : start_lon, 'end_lat' : end_lat, 'end_lon' : end_lon, 'method': 'walk'}
-#                 break
-#             except:
-#                 continue
-#     return return_obj
-
-
+        #Change distance in meters to miles
+        distance_in_miles = cleaned_sections.iloc[i]["distance"] * 0.000621371
+        mode = cleaned_sections.iloc[i]["sensed_mode"]
+        start_loc = cleaned_sections.iloc[i]["start_loc"]["coordinates"]
+        start_lat = str(start_loc[0])
+        start_lon = str(start_loc[1])
+        start_lat_lon = start_lat + ',' + start_lon
+        trip_id = cleaned_sections.iloc[i]['trip_id']
+        tripDict = suggestion_trips.find_one({'uuid': uuid})
+        print(tripDict)
+        end_loc = cleaned_sections.iloc[i]["end_loc"]["coordinates"]
+        end_lat = str(end_loc[0])
+        end_lon = str(end_loc[1])
+        end_lat_lon = end_lat + ',' + end_lon
+        endpoint_categories = category_of_business(end_lat_lon)
+        business_locations = {}
+        begin_address = return_address_from_location(start_lat_lon)[2]
+        city = return_address_from_location(end_lat_lon)[1]
+        address = return_address_from_location(end_lat_lon)[2]
+        #ALREADY CALCULATED BY DISTANCE_IN_MILES
+        #comp_distance = distance(dummy, end_lat_lon)
+        location_review = review_start_loc(end_lat_lon)
+        ratings_bus = {}
+        error_message = 'Sorry, unable to retrieve datapoint'
+        for categor in endpoint_categories:
+            queried_bus = search(API_KEY, categor, city)['businesses']
+            for q in queried_bus:
+                if q['rating'] >= location_review:
+                    #'Coordinates' come out as two elements, latitude and longitude
+                    ratings_bus[q['name']] = q['rating']
+                    obtained = q['location']['display_address'][0] + q['location']['display_address'][1] 
+                    obtained.replace(' ', '+')
+                    business_locations[q['name']] = obtained
+        for a in business_locations:
+            calculate_distance = distance(start_lat_lon, business_locations[a])
+            #Will check which mode the trip was taking for the integrated calculate yelp suggestion
+            if calculate_distance < distance_in_miles and calculate_distance < 5 and calculate_distance >= 1:
+                try:
+                    message = "Why didn't you bike from " + begin_address + " to " + a + " (tap me to view) " + a + \
+                    " has better reviews, closer to your original starting point, and has a rating of " + str(ratings_bus[a])
+                    #Not sure to include the amount of carbon saved
+                    #Still looking to see what to return with this message, because currently my latitude and longitudes are stacked together in one string
+                    return {'message' : message, 'method': 'bike'}
+                    #insert_into_db(tripDict, trip_id, suggestion_trips, uuid)
+                    break
+                except ValueError as e:
+                    continue
+            elif calculate_distance < distance_in_miles and calculate_distance < 1:
+                try: 
+                    message = "Why didn't you walk from " + begin_address + " to " + a + " (tap me to view) " + a + \
+                    " has better reviews, closer to your original starting point, and has a rating of " + str(ratings_bus[a])
+                    return {'message' : message, 'method': 'walk'}
+                    break
+                except ValueError as e:
+                    continue
+            elif calculate_distance < distance_in_miles and calculate_distance >= 5 and calculate_distance <= 15:
+                try: 
+                    message = "Why didn't you check out public transportation from " + begin_address + " to " + a + " (tap me to view) " + a + \
+                    " has better reviews, closer to your original starting point, and has a rating of " + str(ratings_bus[a])
+                    return {'message' : message, 'method': 'public'}
+                    break
+                except ValueError as e:
+                    continue
 
 
 #########################################################################################################
