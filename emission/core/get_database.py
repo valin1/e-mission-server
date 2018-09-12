@@ -48,6 +48,10 @@ def get_trip_db():
     Trips=_get_current_db().Stage_Trips
     return Trips
 
+def get_yelp_db():
+    yelp_trips = _get_current_db().yelp_trips
+    return yelp_trips
+
 def get_profile_db():
     # current_db=MongoClient().Stage_database
     Profiles=_get_current_db().Stage_Profiles
