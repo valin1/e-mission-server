@@ -260,7 +260,7 @@ def calculate_yelp_server_suggestion(uuid):
     user_id = all_users.iloc[all_users[all_users.uuid == uuid].index.tolist()[0]].uuid
     time_series = esta.TimeSeries.get_time_series(user_id)
     cleaned_sections = time_series.get_data_df("analysis/inferred_section", time_query = None)
-    # suggestion_trips = edb.get_suggestion_trips_db()
+    yelp_suggestion_trips = edb.get_yelp_db()
     #Go in reverse order because we check by most recent trip
     counter = 40
     if len(cleaned_sections) == 0:
@@ -281,7 +281,7 @@ def calculate_yelp_server_suggestion(uuid):
         start_lat = str(start_loc[1])
         start_lat_lon = start_lat + ',' + start_lon
         trip_id = cleaned_sections.iloc[i]['trip_id']
-        # tripDict = suggestion_trips.find_one({'uuid': uuid})
+        tripDict = yelp_suggestion_trips.find_one({'uuid': uuid})
         #print(tripDict)
         end_loc = cleaned_sections.iloc[i]["end_loc"]["coordinates"]
         end_lon = str(end_loc[0])
@@ -324,7 +324,9 @@ def calculate_yelp_server_suggestion(uuid):
                     " has better reviews, closer to your original starting point, and has a rating of " + str(ratings_bus[a])
                     #Not sure to include the amount of carbon saved
                     #Still looking to see what to return with this message, because currently my latitude and longitudes are stacked together in one string
+                    insert_into_db(tripDict, trip_id, yelp_suggestion_trips, uuid)
                     return {'message' : message, 'method': 'bike'}
+
                     #insert_into_db(tripDict, trip_id, suggestion_trips, uuid)
                     break
                 except ValueError as e:
@@ -333,6 +335,7 @@ def calculate_yelp_server_suggestion(uuid):
                 try: 
                     message = "Why didn't you walk from " + begin_address + " to " + a + " (tap me to view) " + a + \
                     " has better reviews, closer to your original starting point, and has a rating of " + str(ratings_bus[a])
+                    insert_into_db(tripDict, trip_id, yelp_suggestion_trips, uuid)
                     return {'message' : message, 'method': 'walk'}
                     break
                 except ValueError as e:
@@ -341,6 +344,7 @@ def calculate_yelp_server_suggestion(uuid):
                 try: 
                     message = "Why didn't you check out public transportation from " + begin_address + " to " + a + " (tap me to view) " + a + \
                     " has better reviews, closer to your original starting point, and has a rating of " + str(ratings_bus[a])
+                    insert_into_db(tripDict, trip_id, yelp_suggestion_trips, uuid)
                     return {'message' : message, 'method': 'public'}
                     break
                 except ValueError as e:
@@ -805,7 +809,6 @@ def calculate_single_suggestion(uuid):
         start_lon = str(start_loc[1])
         trip_id = cleaned_sections.iloc[i]['trip_id']
         tripDict = suggestion_trips.find_one({'uuid': uuid})
-        print(tripDict)
         end_loc = cleaned_sections.iloc[i]["end_loc"]["coordinates"]
         end_lat = str(end_loc[0])
         end_lon = str(end_loc[1])
