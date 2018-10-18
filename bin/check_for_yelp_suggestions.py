@@ -30,3 +30,9 @@ def handle_insert(tripDict, tripID, collection, uuid):
         else:
             return False
 
+def calculate_single_yelp_suggestion(UUID):
+	logging.debug("About to calculate single suggestion for %s" % UUID)
+	yelp_suggestion_trips = edb.get_yelp_db()
+	return_obj = {'message': "Good job walking and biking! No suggestion to show.",
+    'savings': "0", 'method' : 'bike'}
+    all_users = pd.DataFrame()

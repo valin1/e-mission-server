@@ -1,15 +1,15 @@
-import emission.storage.timeseries.abstract_timeseries as esta
+from __future__ import print_function
+from datetime import datetime
+from uuid import UUID
 import pandas as pd
 import requests
 import json
 import logging
 import re
 import emission.core.get_database as edb
-from __future__ import print_function
+import emission.storage.timeseries.abstract_timeseries as esta
 import argparse
 import pprint
-from datetime import datetime
-from uuid import UUID
 
 
 
@@ -162,6 +162,9 @@ def return_address_from_location_yelp(location='0,0'):
             print(address_comp)
             return business_tuple[1], cleaned[3]['short_name'], address_comp
         else: #otherwise, we just return the address
+            print(cleaned[0]['long_name'])
+            print(cleaned[1]['short_name'])
+            print(cleaned[3]['short_name'])
             return cleaned[0]['long_name'] + ' ' + cleaned[1]['short_name'] + ', ' + cleaned[3]['short_name']
     except:
         try:
@@ -175,8 +178,14 @@ def return_address_from_location_yelp(location='0,0'):
             business_tuple = check_against_business_location(location, chk)
             if business_tuple[0]: #If true, the lat, lon matches a business location and we return business name
                 address_comp = cleaned[0]['long_name'] + ' ' + cleaned[1]['short_name'] 
+                print(address_comp)
+                print(business_tuple[1])
+                print(cleaned[3]['short_name'])
                 return business_tuple[1], cleaned[3]['short_name'], address_comp
             else: #otherwise, we just return the address
+                print(cleaned[0]['long_name'])
+                print(cleaned[1]['short_name'])
+                print(cleaned[3]['short_name'])
                 return cleaned[0]['long_name'] + ' ' + cleaned[1]['short_name'] + ', ' + cleaned[3]['short_name']
         except:
             raise ValueError("Something went wrong")
@@ -261,6 +270,7 @@ def calculate_yelp_server_suggestion(uuid):
     time_series = esta.TimeSeries.get_time_series(user_id)
     cleaned_sections = time_series.get_data_df("analysis/inferred_section", time_query = None)
     yelp_suggestion_trips = edb.get_yelp_db()
+    # print(cleaned_sections)
     #Go in reverse order because we check by most recent trip
     counter = 40
     if len(cleaned_sections) == 0:
@@ -287,6 +297,7 @@ def calculate_yelp_server_suggestion(uuid):
         end_lon = str(end_loc[0])
         end_lat = str(end_loc[1])
         end_lat_lon = end_lat + ',' + end_lon
+        print(end_lat_lon)
         endpoint_categories = category_of_business(end_lat_lon)
         business_locations = {}
         if len(return_address_from_location_yelp(start_lat_lon))==1:
@@ -698,7 +709,9 @@ def calculate_yelp_server_suggestion(uuid):
 #                     break
 #                 except ValueError as e:
 #                     continue
-
+# all_users = pd.DataFrame(list(edb.get_uuid_db().find({}, {"user_email":1, "uuid": 1, "_id": 0})))
+# print(all_users)
+# calculate_yelp_server_suggestion(UUID('e874c5be-914a-4f29-844b-5e2fe51c1c32'))
 
 #########################################################################################################
 #SEMESTER 1: If user could've taken a more sustainable transportation route, then suggest that sustainable
