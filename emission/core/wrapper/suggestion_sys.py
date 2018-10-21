@@ -149,22 +149,24 @@ def return_address_from_location_yelp(location='0,0'):
         #This try block is for our first 150,000 requests. If we exceed this, use Jack's Token.
         key_string = '&key=' + ACCESS_TOKEN
         url = base_url + latlng + key_string #Builds the url
+        print(url)
         result = requests.get(url).json() #Gets google maps json file
         cleaned = result['results'][0]['address_components']
+
         #Address to check against value of check_against_business_location
         chk = cleaned[0]['long_name'] + ' ' + cleaned[1]['long_name'] + ', ' + cleaned[3]['long_name']
         business_tuple = check_against_business_location(location, chk)
         
         if business_tuple[0]: #If true, the lat, lon matches a business location and we return business name
             address_comp = cleaned[0]['long_name'] + ' ' + cleaned[1]['short_name']
-            print(business_tuple[1])
-            print(cleaned[3]['short_name'])
-            print(address_comp)
+            # print(business_tuple[1])
+            # print(cleaned[3]['short_name'])
+            # print(address_comp)
             return business_tuple[1], cleaned[3]['short_name'], address_comp
         else: #otherwise, we just return the address
-            print(cleaned[0]['long_name'])
-            print(cleaned[1]['short_name'])
-            print(cleaned[3]['short_name'])
+            # print(cleaned[0]['long_name'])
+            # print(cleaned[1]['short_name'])
+            # print(cleaned[3]['short_name'])
             return cleaned[0]['long_name'] + ' ' + cleaned[1]['short_name'] + ', ' + cleaned[3]['short_name']
     except:
         try:
@@ -178,14 +180,14 @@ def return_address_from_location_yelp(location='0,0'):
             business_tuple = check_against_business_location(location, chk)
             if business_tuple[0]: #If true, the lat, lon matches a business location and we return business name
                 address_comp = cleaned[0]['long_name'] + ' ' + cleaned[1]['short_name'] 
-                print(address_comp)
-                print(business_tuple[1])
-                print(cleaned[3]['short_name'])
+                # print(address_comp)
+                # print(business_tuple[1])
+                # print(cleaned[3]['short_name'])
                 return business_tuple[1], cleaned[3]['short_name'], address_comp
             else: #otherwise, we just return the address
-                print(cleaned[0]['long_name'])
-                print(cleaned[1]['short_name'])
-                print(cleaned[3]['short_name'])
+                # print(cleaned[0]['long_name'])
+                # print(cleaned[1]['short_name'])
+                # print(cleaned[3]['short_name'])
                 return cleaned[0]['long_name'] + ' ' + cleaned[1]['short_name'] + ', ' + cleaned[3]['short_name']
         except:
             raise ValueError("Something went wrong")
@@ -256,6 +258,12 @@ def distance(address1, address2):
     return response.json()['route']['distance']
 
 
+def geojson_to_latlon(geojson):
+    coordinates = geojson["coordinates"]
+    lon = str(coordinates[0])
+    lat = str(coordinates[1])
+    lat_lon = lat + ',' + lon
+    return lat_lon
 
 #New and cleaned up version of yelp-suggestion that detects if 
 
@@ -268,7 +276,7 @@ def calculate_yelp_server_suggestion(uuid):
     all_users = pd.DataFrame(list(edb.get_uuid_db().find({}, {"uuid": 1, "_id": 0})))
     user_id = all_users.iloc[all_users[all_users.uuid == uuid].index.tolist()[0]].uuid
     time_series = esta.TimeSeries.get_time_series(user_id)
-    cleaned_sections = time_series.get_data_df("analysis/inferred_section", time_query = None)
+    cleaned_sections = time_series.get_data_df("analysis/cleaned_trip", time_query = None)
     yelp_suggestion_trips = edb.get_yelp_db()
     # print(cleaned_sections)
     #Go in reverse order because we check by most recent trip
