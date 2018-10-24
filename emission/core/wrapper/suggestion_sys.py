@@ -148,6 +148,8 @@ def return_address_from_location_nominatim(lat, lon):
         return result["display_name"]
     except:
         raise ValueError("Something went wrong")
+
+
 def return_address_from_location_yelp(location='0,0'):
     """
     Creates a Google Maps API call that returns the addresss given a lat, lon
@@ -163,6 +165,7 @@ def return_address_from_location_yelp(location='0,0'):
         print(url)
         result = requests.get(url).json() #Gets google maps json file
         cleaned = result['results'][0]['address_components']
+
 
         #Address to check against value of check_against_business_location
         chk = cleaned[0]['long_name'] + ' ' + cleaned[1]['long_name'] + ', ' + cleaned[3]['long_name']
@@ -256,9 +259,9 @@ def match_category(location0 = '0,0', location1 = '0,0'):
             return True
     return False
 
-
-
-
+'''
+Function that RETURNS distance between addresses
+'''
 def distance(address1, address2):
     address1 = address1.replace(' ', '+')
     address2 = address2.replace(' ', '+')
@@ -268,7 +271,9 @@ def distance(address1, address2):
     print(url)
     return response.json()['route']['distance']
 
-
+'''
+Two functions that RETURN latitude and longitude coordinates from GEOJSON file
+'''
 def geojson_to_latlon(geojson):
     coordinates = geojson["coordinates"]
     lon = str(coordinates[0])
@@ -282,10 +287,51 @@ def geojson_to_lat_lon_separated(geojson):
     lat = str(coordinates[1])
     return lat, lon
 
+'''
+Determines the mode that was mostly used through out the trip. 
+'''
+def most_used_mode_from_trip(cleaned_trip, cleaned_sections, section_counter, trip_counter):
+    end_location = cleaned_trip.iloc[trip_counter]["end_loc"]
+    end_loc_lat, end_loc_lon = geojson_to_lat_lon_separated(end_location)
+    modes_from_section = []
+    endsec_location = cleaned_sections.iloc[section_counter]["end_loc"]
+    endsec_loc_lat, endsec_loc_lon = geojson_to_lat_lon_separated(endsec_location)
+    #If a trip is a whole section to start off with
+    if (endsec_loc_lat == end_loc_lat and endsec_loc_lon == end_loc_lon):
+        return cleaned_sections.iloc[section_counter]["sensed_mode"], section_counter + 1
 
+    while endsec_loc_lat!= end_loc_lat and endsec_loc_lon!=end_loc_lon and section_counter < len(cleaned_sections) :
+        modes_from_section.append(cleaned_sections.iloc[section_counter]["sensed_mode"])
+        endsec_location = cleaned_sections.iloc[section_counter]["end_loc"]
+        endsec_loc_lat, endsec_loc_lon = geojson_to_lat_lon_separated(endsec_location)
+        section_counter +=1
 
-#New and cleaned up version of yelp-suggestion that detects if 
+    return most_common_node(modes_from_section), section_counter
 
+'''
+Given a list of modes, should RETURN the most used mode.
+'''
+
+def most_common_mode(list_modes):
+    return max(set(list_modes), key = list_modes.count)
+
+# Should return the section counter, so you know which index to start off with 
+'''
+New and cleaned up version of yelp-suggestion that detects if there is a better-reviewed place of the same 
+category near the user based on the trip point. 
+'''
+
+def dummy_starter_suggestion(uuid):
+    all_users = pd.DataFrame(list(edb.get_uuid_db().find({}, {"uuid": 1, "_id": 0})))
+    user_id = all_users.iloc[all_users[all_users.uuid == uuid].index.tolist()[0]].uuid
+    time_series = esta.TimeSeries.get_time_series(user_id)
+    cleaned_sections = time_series.get_data_df("analysis/cleaned_trip", time_query = None)
+    real_cleaned_sections = time_series.get_data_df("analysis/inferred_section", time_query = None)
+    modes_from_trips = {}
+    section_counter = 0
+    for i in range(len(cleaned_sections)):
+        modes_from_trips[i], section_counter = most_used_mode_from_trip(cleaned_sections, real_cleaned_sections, section_counter, i)
+    print(modes_from_trips)
 
 def calculate_yelp_server_suggestion(uuid):
     #Given a single UUID, create a suggestion for them
@@ -296,7 +342,19 @@ def calculate_yelp_server_suggestion(uuid):
     user_id = all_users.iloc[all_users[all_users.uuid == uuid].index.tolist()[0]].uuid
     time_series = esta.TimeSeries.get_time_series(user_id)
     cleaned_sections = time_series.get_data_df("analysis/cleaned_trip", time_query = None)
+    real_cleaned_sections = time_series.get_data_df("analysis/inferred_section", time_query = None)
+    print("TimeSeries")
+    print(time_series)
+    print("Real Cleaned Sections")
+    print(real_cleaned_sections)
+    print("Cleaned Trips")
+    print(cleaned_sections)
     yelp_suggestion_trips = edb.get_yelp_db()
+    modes_from_trips = {}
+    section_counter = 0
+    for i in range(len(cleaned_sections)):
+        modes_from_trips[i], section_counter = most_used_mode_from_trip(cleaned_sections, real_cleaned_sections, section_counter, i)
+        
     # print(cleaned_sections)
     #Go in reverse order because we check by most recent trip
     counter = 40
