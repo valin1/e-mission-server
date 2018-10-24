@@ -237,8 +237,8 @@ Function that RETURNS a list of categories that the business falls into
 def category_of_business(location = '0,0'):
     try:
         #Off at times if the latlons are of a location that takes up a small spot, especially boba shops
-        print(return_address_from_location_yelp(location))
-        print(len(return_address_from_location_yelp(location)))
+        # print(return_address_from_location_yelp(location))
+        # print(len(return_address_from_location_yelp(location)))
         #IF RETURN_ADDRESS_FROM_LOCATION HAS A BUSINESS LOCATION ATTACHED TO THE ADDRESS
         if (len(return_address_from_location_yelp(location)) == 3):
             business_name, city, address = return_address_from_location_yelp(location)
@@ -247,7 +247,7 @@ def category_of_business(location = '0,0'):
                 categories.append(c['alias'])
             return categories
         else:
-            print(search(API_KEY, '', return_address_from_location_yelp(location)))
+            # print(search(API_KEY, '', return_address_from_location_yelp(location)))
             return None
     except:
         try:
@@ -392,7 +392,7 @@ def calculate_yelp_server_suggestion(uuid):
         end_lat_lon = geojson_to_latlon(cleaned_sections.iloc[i]["end_loc"])
         # tripDict = yelp_suggestion_trips.find_one({'uuid': uuid})
         endpoint_categories = category_of_business(end_lat_lon)
-        print(endpoint_categories)
+        # print(endpoint_categories)
         business_locations = {}
         if len(return_address_from_location_yelp(start_lat_lon))==1:
             begin_address = return_address_from_location_yelp(start_lat_lon)
