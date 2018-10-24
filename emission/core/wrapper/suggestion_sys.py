@@ -137,6 +137,17 @@ def check_against_business_location(location='0, 0', address = ''):
         except:
             raise ValueError("Something went wrong")
 
+def return_address_from_location_nominatim(lat, lon):
+    
+    base_url = 'https://nominatim.openstreetmap.org/reverse?format=json&'
+    lat_lon = 'lat=' + lat + '&lon=' + lon
+    zoom = '&zoom=18&addressdetails=1'
+    try: 
+        url = base_url + lat_lon + zoom
+        result = requests.get(url).json()
+        return result["display_name"]
+    except:
+        raise ValueError("Something went wrong")
 def return_address_from_location_yelp(location='0,0'):
     """
     Creates a Google Maps API call that returns the addresss given a lat, lon
@@ -264,6 +275,14 @@ def geojson_to_latlon(geojson):
     lat = str(coordinates[1])
     lat_lon = lat + ',' + lon
     return lat_lon
+
+def geojson_to_lat_lon_separated(geojson):
+    coordinates = geojson["coordinates"]
+    lon = str(coordinates[0])
+    lat = str(coordinates[1])
+    return lat, lon
+
+
 
 #New and cleaned up version of yelp-suggestion that detects if 
 
