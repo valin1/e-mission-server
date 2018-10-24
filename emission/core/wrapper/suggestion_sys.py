@@ -162,7 +162,6 @@ def return_address_from_location_yelp(location='0,0'):
         #This try block is for our first 150,000 requests. If we exceed this, use Jack's Token.
         key_string = '&key=' + ACCESS_TOKEN
         url = base_url + latlng + key_string #Builds the url
-        print(url)
         result = requests.get(url).json() #Gets google maps json file
         cleaned = result['results'][0]['address_components']
 
@@ -370,46 +369,21 @@ def calculate_yelp_server_suggestion(uuid):
     time_series = esta.TimeSeries.get_time_series(user_id)
     cleaned_sections = time_series.get_data_df("analysis/cleaned_trip", time_query = None)
     real_cleaned_sections = time_series.get_data_df("analysis/inferred_section", time_query = None)
-    print("TimeSeries")
-    print(time_series)
-    print("Real Cleaned Sections")
-    print(real_cleaned_sections)
-    print("Cleaned Trips")
-    print(cleaned_sections)
     yelp_suggestion_trips = edb.get_yelp_db()
     modes_from_trips = {}
     section_counter = 0
     for i in range(len(cleaned_sections)):
         modes_from_trips[i], section_counter = most_used_mode_from_trip(cleaned_sections, real_cleaned_sections, section_counter, i)
-        
-    # print(cleaned_sections)
-    #Go in reverse order because we check by most recent trip
-    counter = 40
+    
     if len(cleaned_sections) == 0:
         return_obj['message'] = 'Suggestions will appear once you start taking trips!'
         return return_obj
     for i in range(len(cleaned_sections) - 1, -1, -1):
-        counter -=1 
-        if counter < 0:
-            return return_obj
-        #NOT QUITE SURE WHAT THIS LINE OF CODE IS SUPPOSED TO DO?
-        if cleaned_sections.iloc[i]["end_ts"] - cleaned_sections.iloc[i]["start_ts"] < 5 * 60:
-            continue
-        #Change distance in meters to miles
         distance_in_miles = cleaned_sections.iloc[i]["distance"] * 0.000621371
-        mode = cleaned_sections.iloc[i]["sensed_mode"]
-        start_loc = cleaned_sections.iloc[i]["start_loc"]["coordinates"]
-        start_lon = str(start_loc[0])
-        start_lat = str(start_loc[1])
-        start_lat_lon = start_lat + ',' + start_lon
-        trip_id = cleaned_sections.iloc[i]['trip_id']
-        tripDict = yelp_suggestion_trips.find_one({'uuid': uuid})
-        #print(tripDict)
-        end_loc = cleaned_sections.iloc[i]["end_loc"]["coordinates"]
-        end_lon = str(end_loc[0])
-        end_lat = str(end_loc[1])
-        end_lat_lon = end_lat + ',' + end_lon
-        print(end_lat_lon)
+        mode = modes_from_trips[i]
+        start_lat_lon = geojson_to_latlon(cleaned_sections.iloc[i]["start_loc"])
+        end_lat_lon = geojson_to_latlon(cleaned_sections.iloc[i]["end_loc"])
+        # tripDict = yelp_suggestion_trips.find_one({'uuid': uuid})
         endpoint_categories = category_of_business(end_lat_lon)
         business_locations = {}
         if len(return_address_from_location_yelp(start_lat_lon))==1:
@@ -420,8 +394,6 @@ def calculate_yelp_server_suggestion(uuid):
             continue
         city = return_address_from_location_yelp(end_lat_lon)[1]
         address = return_address_from_location_yelp(end_lat_lon)[2]
-        #ALREADY CALCULATED BY DISTANCE_IN_MILES
-        #comp_distance = distance(dummy, end_lat_lon)
         location_review = review_start_loc(end_lat_lon)
         ratings_bus = {}
         error_message = 'Sorry, unable to retrieve datapoint'
@@ -447,7 +419,7 @@ def calculate_yelp_server_suggestion(uuid):
                     " has better reviews, closer to your original starting point, and has a rating of " + str(ratings_bus[a])
                     #Not sure to include the amount of carbon saved
                     #Still looking to see what to return with this message, because currently my latitude and longitudes are stacked together in one string
-                    insert_into_db(tripDict, trip_id, yelp_suggestion_trips, uuid)
+                    # insert_into_db(tripDict, i, yelp_suggestion_trips, uuid)
                     return {'message' : message, 'method': 'bike'}
 
                     #insert_into_db(tripDict, trip_id, suggestion_trips, uuid)
@@ -458,7 +430,7 @@ def calculate_yelp_server_suggestion(uuid):
                 try: 
                     message = "Why didn't you walk from " + begin_address + " to " + a + " (tap me to view) " + a + \
                     " has better reviews, closer to your original starting point, and has a rating of " + str(ratings_bus[a])
-                    insert_into_db(tripDict, trip_id, yelp_suggestion_trips, uuid)
+                    # insert_into_db(tripDict, i, yelp_suggestion_trips, uuid)
                     return {'message' : message, 'method': 'walk'}
                     break
                 except ValueError as e:
@@ -467,11 +439,103 @@ def calculate_yelp_server_suggestion(uuid):
                 try: 
                     message = "Why didn't you check out public transportation from " + begin_address + " to " + a + " (tap me to view) " + a + \
                     " has better reviews, closer to your original starting point, and has a rating of " + str(ratings_bus[a])
-                    insert_into_db(tripDict, trip_id, yelp_suggestion_trips, uuid)
+                    # insert_into_db(tripDict, i, yelp_suggestion_trips, uuid)
                     return {'message' : message, 'method': 'public'}
                     break
                 except ValueError as e:
                     continue
+
+
+    # print(cleaned_sections)
+    #Go in reverse order because we check by most recent trip
+    # counter = 40
+    # if len(cleaned_sections) == 0:
+    #     return_obj['message'] = 'Suggestions will appear once you start taking trips!'
+    #     return return_obj
+    # for i in range(len(cleaned_sections) - 1, -1, -1):
+    #     counter -=1 
+    #     if counter < 0:
+    #         return return_obj
+    #     #NOT QUITE SURE WHAT THIS LINE OF CODE IS SUPPOSED TO DO?
+    #     if cleaned_sections.iloc[i]["end_ts"] - cleaned_sections.iloc[i]["start_ts"] < 5 * 60:
+    #         continue
+    #     #Change distance in meters to miles
+    #     distance_in_miles = cleaned_sections.iloc[i]["distance"] * 0.000621371
+    #     mode = cleaned_sections.iloc[i]["sensed_mode"]
+    #     start_loc = cleaned_sections.iloc[i]["start_loc"]["coordinates"]
+    #     start_lon = str(start_loc[0])
+    #     start_lat = str(start_loc[1])
+    #     start_lat_lon = start_lat + ',' + start_lon
+    #     trip_id = cleaned_sections.iloc[i]['trip_id']
+    #     tripDict = yelp_suggestion_trips.find_one({'uuid': uuid})
+    #     #print(tripDict)
+    #     end_loc = cleaned_sections.iloc[i]["end_loc"]["coordinates"]
+    #     end_lon = str(end_loc[0])
+    #     end_lat = str(end_loc[1])
+    #     end_lat_lon = end_lat + ',' + end_lon
+    #     print(end_lat_lon)
+    #     endpoint_categories = category_of_business(end_lat_lon)
+    #     business_locations = {}
+    #     if len(return_address_from_location_yelp(start_lat_lon))==1:
+    #         begin_address = return_address_from_location_yelp(start_lat_lon)
+    #     else:
+    #         begin_address = return_address_from_location_yelp(start_lat_lon)[2]
+    #     if len(return_address_from_location_yelp(end_lat_lon)) == 1:
+    #         continue
+    #     city = return_address_from_location_yelp(end_lat_lon)[1]
+    #     address = return_address_from_location_yelp(end_lat_lon)[2]
+    #     #ALREADY CALCULATED BY DISTANCE_IN_MILES
+    #     #comp_distance = distance(dummy, end_lat_lon)
+    #     location_review = review_start_loc(end_lat_lon)
+    #     ratings_bus = {}
+    #     error_message = 'Sorry, unable to retrieve datapoint'
+    #     error_message_categor = 'Sorry, unable to retrieve datapoint because datapoint is a house or datapoint does not belong in service categories'
+    #     if (endpoint_categories):
+    #         for categor in endpoint_categories:
+    #             queried_bus = search(API_KEY, categor, city)['businesses']
+    #             for q in queried_bus:
+    #                 if q['rating'] >= location_review:
+    #                     #'Coordinates' come out as two elements, latitude and longitude
+    #                     ratings_bus[q['name']] = q['rating']
+    #                     obtained = q['location']['display_address'][0] + q['location']['display_address'][1] 
+    #                     obtained.replace(' ', '+')
+    #                     business_locations[q['name']] = obtained
+    #     else: 
+    #         return {'message' : error_message_categor, 'method': 'bike'}
+    #     for a in business_locations:
+    #         calculate_distance = distance(start_lat_lon, business_locations[a])
+    #         #Will check which mode the trip was taking for the integrated calculate yelp suggestion
+    #         if calculate_distance < distance_in_miles and calculate_distance < 5 and calculate_distance >= 1:
+    #             try:
+    #                 message = "Why didn't you bike from " + begin_address + " to " + a + " (tap me to view) " + a + \
+    #                 " has better reviews, closer to your original starting point, and has a rating of " + str(ratings_bus[a])
+    #                 #Not sure to include the amount of carbon saved
+    #                 #Still looking to see what to return with this message, because currently my latitude and longitudes are stacked together in one string
+    #                 insert_into_db(tripDict, trip_id, yelp_suggestion_trips, uuid)
+    #                 return {'message' : message, 'method': 'bike'}
+
+    #                 #insert_into_db(tripDict, trip_id, suggestion_trips, uuid)
+    #                 break
+    #             except ValueError as e:
+    #                 continue
+    #         elif calculate_distance < distance_in_miles and calculate_distance < 1:
+    #             try: 
+    #                 message = "Why didn't you walk from " + begin_address + " to " + a + " (tap me to view) " + a + \
+    #                 " has better reviews, closer to your original starting point, and has a rating of " + str(ratings_bus[a])
+    #                 insert_into_db(tripDict, trip_id, yelp_suggestion_trips, uuid)
+    #                 return {'message' : message, 'method': 'walk'}
+    #                 break
+    #             except ValueError as e:
+    #                 continue
+    #         elif calculate_distance < distance_in_miles and calculate_distance >= 5 and calculate_distance <= 15:
+    #             try: 
+    #                 message = "Why didn't you check out public transportation from " + begin_address + " to " + a + " (tap me to view) " + a + \
+    #                 " has better reviews, closer to your original starting point, and has a rating of " + str(ratings_bus[a])
+    #                 insert_into_db(tripDict, trip_id, yelp_suggestion_trips, uuid)
+    #                 return {'message' : message, 'method': 'public'}
+    #                 break
+    #             except ValueError as e:
+    #                 continue
 
 #########################################################################################################
 #SEMESTER 1: If user could've taken a more sustainable transportation route, then suggest that sustainable
