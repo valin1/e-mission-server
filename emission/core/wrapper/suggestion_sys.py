@@ -286,6 +286,32 @@ def geojson_to_lat_lon_separated(geojson):
     lon = str(coordinates[0])
     lat = str(coordinates[1])
     return lat, lon
+'''
+Determines the motion type in words from sensed mode.
+'''
+def sensed_to_motion_type(value):
+    if value == 0:
+        return "IN_VEHICLE"
+    elif value == 1:
+        return "BIKING"
+    elif value == 2:
+        return "ON_FOOT"
+    elif value == 3:
+        return "STILL"
+    elif value == 4:
+        return "UNKNOWN"
+    elif value == 5:
+        return "TILTING"
+    elif value == 7:
+        return "WALKING"
+    elif value == 8:
+        return "RUNNING"
+    elif value == 9:
+        return "NONE"
+    elif value == 10:
+        return "STOPPED_WHILE_IN_VEHICLE"
+    elif value == 11:
+        return "AIR_ON_HSR"
 
 '''
 Determines the mode that was mostly used through out the trip. 
@@ -296,17 +322,18 @@ def most_used_mode_from_trip(cleaned_trip, cleaned_sections, section_counter, tr
     modes_from_section = []
     endsec_location = cleaned_sections.iloc[section_counter]["end_loc"]
     endsec_loc_lat, endsec_loc_lon = geojson_to_lat_lon_separated(endsec_location)
-    #If a trip is a whole section to start off with
+    #If a trip is a whole section to start off with 
+    mode_word = ''
     if (endsec_loc_lat == end_loc_lat and endsec_loc_lon == end_loc_lon):
-        return cleaned_sections.iloc[section_counter]["sensed_mode"], section_counter + 1
+        return sensed_to_motion_type(cleaned_sections.iloc[section_counter]["sensed_mode"]), section_counter + 1
 
     while endsec_loc_lat!= end_loc_lat and endsec_loc_lon!=end_loc_lon and section_counter < len(cleaned_sections) :
-        modes_from_section.append(cleaned_sections.iloc[section_counter]["sensed_mode"])
+        modes_from_section.append(sensed_to_motion_type(cleaned_sections.iloc[section_counter]["sensed_mode"]))
         endsec_location = cleaned_sections.iloc[section_counter]["end_loc"]
         endsec_loc_lat, endsec_loc_lon = geojson_to_lat_lon_separated(endsec_location)
         section_counter +=1
 
-    return most_common_node(modes_from_section), section_counter
+    return most_common_mode(modes_from_section), section_counter
 
 '''
 Given a list of modes, should RETURN the most used mode.
@@ -331,7 +358,7 @@ def dummy_starter_suggestion(uuid):
     section_counter = 0
     for i in range(len(cleaned_sections)):
         modes_from_trips[i], section_counter = most_used_mode_from_trip(cleaned_sections, real_cleaned_sections, section_counter, i)
-    print(modes_from_trips)
+    return modes_from_trips
 
 def calculate_yelp_server_suggestion(uuid):
     #Given a single UUID, create a suggestion for them
