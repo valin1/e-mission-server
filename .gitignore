@@ -19,3 +19,4 @@ conf/**/*.json
 *.ipynb_checkpoints*
 
 *.secret
+seed_model.json
