@@ -41,15 +41,6 @@ module.exports = function(grunt, options) {
             },
             src: ['examples/js/controllers/*.js'],
             dest: 'examples/js/controllers.js'
-        },
-        website:{
-          options: {
-            //separator: ';',
-            banner: '(function (angular) {\n',
-            footer: '})(window.angular);'
-          },
-          src: ['website/src/js/app.js', 'website/src/js/**/*.js'],
-          dest: 'website/dist/js/<%= pkg.name %>-webpage.js',
         }
     };
 };

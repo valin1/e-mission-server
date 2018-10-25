@@ -2,8 +2,7 @@
 var getAvailPort = require('./utils/getAvailPort');
 var port = getAvailPort(7777);
 
-var _files = ['src/**/*.js', 'test/unit/**.js', 'test/unit/**.coffee', 'test/e2e/**.js',
-'test/unit/**/**.js', 'test/unit/**/**.coffee', 'test/e2e/**/**.js'];
+var _files = ['src/**/*.js', 'test/unit/**.js', 'test/unit/**.coffee', 'test/e2e/**.js'];
 
 module.exports = function(grunt, options) {
     return {
@@ -53,10 +52,6 @@ module.exports = function(grunt, options) {
             tasks: [
                 'examples'
             ]
-        },
-        website: {
-          files: ['website/src/js/app.js', 'website/src/js/**/*.js'],
-          tasks: ['jshint', 'concat:website', 'uglify'] //'ngmin'
         }
     };
 };
