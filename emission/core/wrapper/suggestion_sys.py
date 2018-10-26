@@ -376,7 +376,7 @@ def calculate_yelp_server_suggestion(uuid):
     time_series = esta.TimeSeries.get_time_series(user_id)
     cleaned_sections = time_series.get_data_df("analysis/cleaned_trip", time_query = None)
     real_cleaned_sections = time_series.get_data_df("analysis/inferred_section", time_query = None)
-    yelp_suggestion_trips = edb.get_yelp_db()
+    # yelp_suggestion_trips = edb.get_yelp_db()
     modes_from_trips = {}
     section_counter = 0
     for i in range(len(cleaned_sections)):
