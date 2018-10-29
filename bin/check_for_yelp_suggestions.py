@@ -36,3 +36,20 @@ def calculate_single_yelp_suggestion(UUID):
 	return_obj = {'message': "Good job walking and biking! No suggestion to show.",
     'savings': "0", 'method' : 'bike'}
     all_users = pd.DataFrame()
+    user_id = all_users.iloc[all_users[all_users.uuid == uuid].index.tolist()[0]].uuid
+    time_series = esta.TimeSeries.get_time_series(user_id)
+    cleaned_sections = time_series.get_data_df("analysis/cleaned_trip", time_query = None)
+
+def push_to_user(uuid_list, message):
+    logging.debug("About to send notifications to: %s users" % len(uuid_list))
+    json_data = {
+        "title": "GreenTrip Notification",
+        "message": message
+    }
+    logging.debug(uuid_list)
+    response = pnu.send_visible_notification_to_users(uuid_list,
+                                                        json_data["title"],
+                                                        json_data["message"],
+                                                        json_data,
+                                                        dev = False)
+    pnu.display_response(response)
