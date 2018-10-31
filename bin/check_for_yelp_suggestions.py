@@ -33,12 +33,17 @@ def handle_insert(tripDict, tripID, collection, uuid):
 def calculate_single_yelp_suggestion(UUID):
 	logging.debug("About to calculate single suggestion for %s" % UUID)
 	yelp_suggestion_trips = edb.get_yelp_db()
-	return_obj = {'message': "Good job walking and biking! No suggestion to show.",
-    'savings': "0", 'method' : 'bike'}
     all_users = pd.DataFrame()
     user_id = all_users.iloc[all_users[all_users.uuid == uuid].index.tolist()[0]].uuid
     time_series = esta.TimeSeries.get_time_series(user_id)
-    cleaned_sections = time_series.get_data_df("analysis/cleaned_trip", time_query = None)
+    cleaned_trips = time_series.get_data_df("analysis/cleaned_trip", time_query = None)
+    num_cleaned_trips = len(cleaned_trips)
+    for i in range(num_cleaned_trips-1, -1, -1):
+        if cleaned_trips.iloc[i]["end_ts"] - cleaned_trips.iloc[i]["start_ts"] < 5*60:
+            continue
+        distance_in_miles = cleaned_trips.iloc[i]["distance"]*0.000621371
+        trip_id = cleaned_sections.iloc[i]["trip_id"]
+        #Still need to add the database to log suggestion trips
 
 def push_to_user(uuid_list, message):
     logging.debug("About to send notifications to: %s users" % len(uuid_list))
