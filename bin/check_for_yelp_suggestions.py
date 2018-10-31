@@ -31,7 +31,8 @@ def calculate_single_yelp_suggestion(UUID):
         if cleaned_trips.iloc[i]["end_ts"] - cleaned_trips.iloc[i]["start_ts"] < 5*60:
             continue
         distance_in_miles = cleaned_trips.iloc[i]["distance"]*0.000621371
-        trip_id = cleaned_sections.iloc[i]["trip_id"]
+        trip_id = cleaned_trips.iloc[i]["trip_id"]
+        logging.debug("Considering trip from %s -> %s" % (cleaned_trips.iloc[i]["start_fmt_time"], cleaned_trips.iloc[i]["end_fmt_time"]))
         #Still need to add the database to log suggestion trips
 
 def push_to_user(uuid_list, message):
