@@ -30,17 +30,22 @@ except ImportError:
 # It now uses private keys to authenticate requests (API Key)
 # You can find it on
 # https://www.yelp.com/developers/v3/manage_app
-API_KEY= 'jBC0box-WQr7jvQvXlI9sJuw17wfN9AYFMnu5ebxsYkgQoKTjjIRD0I_tAePUasbaIbXj28cmj4nUBDHrVxtrfHU2l6TM4E61Kk3EVeSbLZsxStLxkAVlkHK9xJ6W3Yx' 
-ACCESS_TOKEN = 'AIzaSyAbnpsty2SAzEX9s1VVIdh5pTHUPMjn3lQ' #GOOGLE MAPS ACCESS TOKEN
-JACK_TOKEN = 'AIzaSyAXG_8bZvAAACChc26JC6SFzhuWysRqQPo'
 
-MAPQUEST_KEY = 'AuwuGlPC5f3Ru7PGahKAtGcs4WdvARem'
-# API constants, you shouldn't have to change these.
-API_HOST = 'https://api.yelp.com'
-SEARCH_PATH = '/v3/businesses/search'
-BUSINESS_PATH = '/v3/businesses/'  # Business ID will come after slash.
+google_maps_json = open('conf/net/ext_service/googlemaps_destination.json', 'r')
+yelp_json = open('conf/net/ext_service/yelpfusion.json', 'r')
+google_maps_auth = json.load(google_maps_json)
+yelp_auth = json.load(yelp_json)
 
-SEARCH_LIMIT = 3
+API_KEY = yelp_auth['api_key']
+ACCESS_TOKEN = google_maps_auth['access_token']
+JACK_TOKEN = google_maps_auth['backup_access_token']
+
+MAPQUEST_KEY = google_maps_auth['map_quest_key']
+API_HOST = yelp_auth['api_host']
+SEARCH_PATH = yelp_auth['search_path']
+BUSINESS_PATH = yelp_auth['business_path']
+
+SEARCH_LIMIT = yelp_auth['search_limit']
 
 #Helper function to query into Yelp's API
 def request(host, path, api_key, url_params=None):

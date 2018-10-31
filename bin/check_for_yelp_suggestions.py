@@ -19,17 +19,6 @@ import emission.core.get_database as edb
 from uuid import UUID
 
 
-def handle_insert(tripDict, tripID, collection, uuid):
-    if tripDict == None:
-        collection.insert_one({'uuid': uuid, 'trip_id': tripID})
-        return True
-    else:
-        if tripDict['trip_id'] != tripID:
-            collection.update_one({'uuid': uuid}, {'$set': {'trip_id' : tripID}})
-            return True
-        else:
-            return False
-
 def calculate_single_yelp_suggestion(UUID):
 	logging.debug("About to calculate single suggestion for %s" % UUID)
 	yelp_suggestion_trips = edb.get_yelp_db()
