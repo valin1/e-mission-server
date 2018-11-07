@@ -449,9 +449,6 @@ def calculate_yelp_server_suggestion_nominatim(uuid):
                     #Still looking to see what to return with this message, because currently my latitude and longitudes are stacked together in one string
                     # insert_into_db(tripDict, i, yelp_suggestion_trips, uuid)
                     return {'message' : message, 'method': 'bike'}
-
-                    #insert_into_db(tripDict, trip_id, suggestion_trips, uuid)
-                    break
                 except ValueError as e:
                     continue
             elif calculate_distance < distance_in_miles and calculate_distance < 1:
@@ -460,7 +457,6 @@ def calculate_yelp_server_suggestion_nominatim(uuid):
                     " has better reviews, closer to your original starting point, and has a rating of " + str(ratings_bus[a])
                     # insert_into_db(tripDict, i, yelp_suggestion_trips, uuid)
                     return {'message' : message, 'method': 'walk'}
-                    break
                 except ValueError as e:
                     continue
             elif calculate_distance < distance_in_miles and calculate_distance >= 5 and calculate_distance <= 15:
@@ -469,7 +465,6 @@ def calculate_yelp_server_suggestion_nominatim(uuid):
                     " has better reviews, closer to your original starting point, and has a rating of " + str(ratings_bus[a])
                     # insert_into_db(tripDict, i, yelp_suggestion_trips, uuid)
                     return {'message' : message, 'method': 'public'}
-                    break
                 except ValueError as e:
                     continue
 
