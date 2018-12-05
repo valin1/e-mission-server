@@ -98,10 +98,9 @@ def request(host, path, api_key, url_params=None):
         'Authorization': 'Bearer %s' % api_key,
     }
 
-    print(u'Querying {0} ...'.format(url))
+    # print(u'Querying {0} ...'.format(url))
 
     response = requests.request('GET', url, headers=headers, params=url_params)
-
     return response.json()
 
 """
@@ -412,21 +411,21 @@ def dummy_starter_suggestion(uuid):
 '''
 NOMINATIM VERSION: Function to find the review of the original location of the end point of a trip 
 '''
-def review_start_loc_nominatim(location = '0,0'):
+def review_start_loc_nominatim(lat, lon):
     try:
         #Off at times if the latlons are of a location that takes up a small spot, especially boba shops
 
         #IF RETURN_ADDRESS_FROM_LOCATION HAS A BUSINESS LOCATION ATTACHED TO THE ADDRESS
-        if (len(return_address_from_location_nominatim(location)) == 3):
-            address, address_dict = return_address_from_location_nominatim(location)
+        if (len(return_address_from_location_nominatim(lat, lon)) == 2):
+            address, address_dict = return_address_from_location_nominatim(lat, lon)
             business_name = address_dict[list(address_dict.keys())[0]]
             city = address_dict['city']
         #print(business_reviews(API_KEY, business_name.replace(' ', '-') + '-' + city))
-            return business_reviews(YELP_API_KEY, business_name.replace(' ', '-') + '-' + city)['rating']
+        return business_reviews(YELP_API_KEY, business_name.replace(' ', '-') + '-' + city)['rating']
     except:
         try:
             #This EXCEPT part may error, because it grabs a list of businesses instead of matching the address to a business
-            address, address_dict = return_address_from_location_nominatim(location)
+            address, address_dict = return_address_from_location_nominatim(lat, lon)
             return match_business_address(address)
         except:
             raise ValueError("Something went wrong")
@@ -464,7 +463,6 @@ def calculate_yelp_server_suggestion_singletrip_nominatim(tripid):
     error_message = 'Sorry, unable to retrieve datapoint'
     error_message_categor = 'Sorry, unable to retrieve datapoint because datapoint is a house or datapoint does not belong in service categories'
     try:
-        print(endpoint_categories)
         if (endpoint_categories):
             for categor in endpoint_categories:
                 queried_bus = search(YELP_API_KEY, categor, city)['businesses']
@@ -535,13 +533,13 @@ def calculate_yelp_server_suggestion_nominatim(uuid):
         end_string_address, end_address_dict = return_address_from_location_nominatim(end_lat, end_lon)
         city = end_address_dict["city"]
         address = end_string_address
+        start_lat_lon = start_lat + "," + start_lon
         end_lat_lon = end_lat + "," + end_lon
-        location_review = review_start_loc(end_lat_lon)
+        location_review = review_start_loc_nominatim(end_lat, end_lon)
         ratings_bus = {}
         error_message = 'Sorry, unable to retrieve datapoint'
         error_message_categor = 'Sorry, unable to retrieve datapoint because datapoint is a house or datapoint does not belong in service categories'
         try:
-            print(endpoint_categories)
             if (endpoint_categories):
                 for categor in endpoint_categories:
                     queried_bus = search(YELP_API_KEY, categor, city)['businesses']
@@ -561,7 +559,7 @@ def calculate_yelp_server_suggestion_nominatim(uuid):
             #Will check which mode the trip was taking for the integrated calculate yelp suggestion
             if calculate_distance < distance_in_miles and calculate_distance < 5 and calculate_distance >= 1:
                 try:
-                    message = "Why didn't you bike from " + begin_address + " to " + a + " (tap me to view) " + a + \
+                    message = "Why didn't you bike from " + begin_string_address + " to " + a + " (tap me to view) " + a + \
                     " has better reviews, closer to your original starting point, and has a rating of " + str(ratings_bus[a])
                     #Not sure to include the amount of carbon saved
                     #Still looking to see what to return with this message, because currently my latitude and longitudes are stacked together in one string
@@ -571,7 +569,7 @@ def calculate_yelp_server_suggestion_nominatim(uuid):
                     continue
             elif calculate_distance < distance_in_miles and calculate_distance < 1:
                 try: 
-                    message = "Why didn't you walk from " + begin_address + " to " + a + " (tap me to view) " + a + \
+                    message = "Why didn't you walk from " + begin_string_address+ " to " + a + " (tap me to view) " + a + \
                     " has better reviews, closer to your original starting point, and has a rating of " + str(ratings_bus[a])
                     # insert_into_db(tripDict, i, yelp_suggestion_trips, uuid)
                     return {'message' : message, 'method': 'walk'}
@@ -579,12 +577,13 @@ def calculate_yelp_server_suggestion_nominatim(uuid):
                     continue
             elif calculate_distance < distance_in_miles and calculate_distance >= 5 and calculate_distance <= 15:
                 try: 
-                    message = "Why didn't you check out public transportation from " + begin_address + " to " + a + " (tap me to view) " + a + \
+                    message = "Why didn't you check out public transportation from " + begin_string_address + " to " + a + " (tap me to view) " + a + \
                     " has better reviews, closer to your original starting point, and has a rating of " + str(ratings_bus[a])
                     # insert_into_db(tripDict, i, yelp_suggestion_trips, uuid)
                     return {'message' : message, 'method': 'public'}
                 except ValueError as e:
                     continue
+    return return_obj
 
 
 #ORIGINAL YELP_SERVER_SUGGESTION FUNCTION USED TO TEST THE NOTIFICATIONS WILL BE MOVING TO NOMINATIM FUNCTION ON THE TOP
