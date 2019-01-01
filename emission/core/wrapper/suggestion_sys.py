@@ -135,7 +135,7 @@ def return_address_from_location_nominatim(lat, lon):
 GOOGLE API: Makes Google Maps API CALL to the domain and returns address given a latitude and longitude
 '''
 
-def return_address_from_google_trial(location):
+def return_address_from_google_nomfile(location):
     return geo.return_address_from_location_google(location)
 
 
@@ -151,6 +151,14 @@ def match_business_address(address):
 
 '''
 NOMINATIM VERS: Function that RETURNS a list of categories that the business falls into 
+
+Using the Google reverse lookup in the except clause, in case Nominatim's results are too vague. 
+Will first try Nominatim's reverse lookup, but if Nominatim returns a broad "address" 
+of the street and the city, without a full address with a specific location 
+Such as Piedmont Ave, Berkeley, CA
+
+Then the function will enter the Google reverse lookup and choose a business that is closest to 
+latitude and longitude given
 '''
 def category_of_business_nominatim(lat, lon):
     try:
@@ -171,7 +179,7 @@ def category_of_business_nominatim(lat, lon):
         #USE GOOGLE API JUST IN CASE if nominatim doesn't work
         location = lat + ',' + lon
         try:
-            address = return_address_from_google_trial(location)
+            address = return_address_from_google_nomfile(location)
             categories = []
             possible_bus = match_business_address(address)["businesses"][0]
             possible_categ = possible_bus["categories"]
