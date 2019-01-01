@@ -310,9 +310,15 @@ def calculate_yelp_server_suggestion_singletrip_nominatim(uuid, tripid):
     user_id = uuid
     timeseries = esta.TimeSeries.get_time_series(user_id)
     cleaned_trips = timeseries.get_data_df("analysis/cleaned_trip", time_query = None)
+    #Will work on changing this method to directly index, because modeled this after the user_id
     spec_trip = cleaned_trips.iloc[cleaned_trips[cleaned_trips._id == tripid].index.tolist()[0]]
     start_location = spec_trip.start_loc
     end_location = spec_trip.end_loc
+    '''
+    Distance in miles because the current calculated distances is through MapQuest which uses miles, 
+    still working on changing those functions, because haven't found any functions through nominatim
+    that calculates distance between points.
+    '''
     distance_in_miles = spec_trip.distance * 0.000621371
     start_lat, start_lon = geojson_to_lat_lon_separated(start_location)
     end_lat, end_lon = geojson_to_lat_lon_separated(end_location)
