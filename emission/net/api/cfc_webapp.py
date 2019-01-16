@@ -264,11 +264,10 @@ def getSuggestion():
   return ret_dir
 
 @post('/suggestion_sys')
-def getSingleTripSuggestion():
+def getSingleTripSuggestion(tripid):
   logging.debug("Called suggestion")
   user_uuid=getUUID(request)
   logging.debug("user_uuid %s" % user_uuid)
-  logging.debug("tripid %s" % tripid)
   ret_dir = suggsys.calculate_yelp_server_suggestion_singletrip_nominatim(user_uuid, tripid)
   logging.debug("type(ret_dir) = %s" % type(ret_dir))
   logging.debug("Output of ret_dir = %s" % ret_dir)

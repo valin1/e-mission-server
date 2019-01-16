@@ -441,6 +441,8 @@ def calculate_yelp_server_suggestion_nominatim(uuid):
         business_locations = {}
         begin_string_address, begin_address_dict = return_address_from_location_nominatim(start_lat, start_lon)
         end_string_address, end_address_dict = return_address_from_location_nominatim(end_lat, end_lon)
+        print(end_string_address)
+        print(end_address_dict)
         try: 
             city = end_address_dict["city"]
         except:
@@ -449,7 +451,9 @@ def calculate_yelp_server_suggestion_nominatim(uuid):
             except:
                 zipcode = end_address_dict["postcode"]
                 city = zipcode_to_city(zipcode)
+        print(city)
         address = end_string_address
+
         start_lat_lon = start_lat + "," + start_lon
         end_lat_lon = end_lat + "," + end_lon
         location_review = review_start_loc_nominatim(end_lat, end_lon)
