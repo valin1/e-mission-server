@@ -447,10 +447,15 @@ def calculate_yelp_server_suggestion_nominatim(uuid):
             city = end_address_dict["city"]
         except:
             try:
+                # To classify cities as towns, as some locations only appear as "TOWN" to nominatim
                 city = end_address_dict["town"]
             except:
-                zipcode = end_address_dict["postcode"]
-                city = zipcode_to_city(zipcode)
+                try:
+                    # To classify cities through zipcode, as some locations only appear as "POSTCODE", so convert postcode to city
+                    zipcode = end_address_dict["postcode"]
+                    city = zipcode_to_city(zipcode)
+                except:
+                    return {'message' : 'Sorry, the most recent trip was unable to be detected as to which city.', 'method': 'bike'}
         print(city)
         address = end_string_address
 
@@ -462,6 +467,7 @@ def calculate_yelp_server_suggestion_nominatim(uuid):
         error_message_categor = 'Sorry, unable to retrieve datapoint because datapoint is a house or datapoint does not belong in service categories'
         try:
             if (endpoint_categories):
+                print(endpoint_categories)
                 for categor in endpoint_categories:
                     queried_bus = search(YELP_API_KEY, categor, city)['businesses']
                     for q in queried_bus:
