@@ -393,7 +393,7 @@ def calculate_yelp_server_suggestion_singletrip_nominatim(uuid, tripid):
                         obtained.replace(' ', '+')
                         business_locations[q['name']] = obtained
     except: 
-        return {'message' : error_message_categor, 'method': 'bike'}
+        return {'message' : error_message_categor, 'method': 'bike', 'rating': None, 'businessid': None}
     
     for a in business_locations:
         try:
@@ -428,7 +428,7 @@ def calculate_yelp_server_suggestion_singletrip_nominatim(uuid, tripid):
             except ValueError as e:
                 continue
    
-    return {'message': "Your endpoint has either been a non-serviceable category or a closeby option.",'method': 'public transportation'}
+    return {'message': "Your endpoint has either been a non-serviceable category or a closeby option.",'method': 'public transportation', 'rating': None, 'businessid': None}
 
 def calculate_yelp_server_suggestion_nominatim(uuid):
     user_id = uuid
@@ -483,7 +483,7 @@ def calculate_yelp_server_suggestion_nominatim(uuid):
                                 obtained.replace(' ', '+')
                                 business_locations[q['name']] = obtained
         except: 
-            return {'message' : error_message_categor, 'method': 'bike'}
+            return {'message' : error_message_categor, 'method': 'bike', 'rating': None, 'businessid': None}
 
         #THIS PART WILL BE FIXED ACCODRING TO NOMINATIM AND GET RID OF MAPQUEST (find some other way to calculate distance)
         for a in business_locations:
@@ -518,6 +518,6 @@ def calculate_yelp_server_suggestion_nominatim(uuid):
                     return {'message' : message, 'method': 'public', 'rating': str(ratings_bus[a]), 'businessid': a}
                 except ValueError as e:
                     continue
-    return {'message': "Your endpoint has either been a non-serviceable category or a closeby option.",'method': 'public transportation'}
+    return {'message': "Your endpoint has either been a non-serviceable category or a closeby option.",'method': 'public transportation', 'rating': None, 'businessid': None}
 
 
