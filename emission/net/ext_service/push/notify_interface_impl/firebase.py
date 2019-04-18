@@ -60,7 +60,7 @@ class FirebasePush(pni.NotifyInterface):
         importHeaders = {"Authorization": "key=%s" % self.server_auth_token,
                          "Content-Type": "application/json"}
         importMessage = {
-            "application": "edu.berkeley.eecs.emission",
+            "application": "edu.berkeley.eecs.embase",
             "sandbox": dev,
             "apns_tokens":token_list
         }
