@@ -89,7 +89,7 @@ def test_calculate_yelp_server_suggestion_for_locations(cfn, params, exp_output,
     end_loc_lon = end_loc_coord['longitude']
 
     noisy_end_loc = {'coordinates': [end_loc_lon, end_loc_lat]}
-
+    logging.debug("start_coord %s" % noisy_start_loc)
     distance_in_miles = sugg.distance(
         sugg.geojson_to_latlon(noisy_start_loc),
         sugg.geojson_to_latlon(noisy_end_loc))

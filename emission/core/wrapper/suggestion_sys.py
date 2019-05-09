@@ -361,9 +361,10 @@ def distance(address1, address2):
     address1 = address1.replace(' ', '+')
     address2 = address2.replace(' ', '+')
 
-
     url = 'http://www.mapquestapi.com/directions/v2/route?key=' + MAPQUEST_KEY + '&from=' + address1 + '&to=' + address2
+    print(url)
     response = requests.get(url)
+    print(response)
     return response.json()['route']['distance']
     # except:
     #     url = 'http://www.mapquestapi.com/directions/v2/route?key=' + BACKUP_MAPQUEST_KEY + '&from=' + address1 + '&to=' + address2
@@ -542,6 +543,8 @@ def calculate_yelp_server_suggestion_for_locations_business_id(start_loc, end_id
     ratings_bus = {}
     error_message = 'Sorry, unable to retrieve datapoint'
     error_message_categor = 'Sorry, unable to retrieve datapoint because datapoint is a house or datapoint does not belong in service categories'
+    print(endpoint_categories)
+    start_lat_lon = start_lat + "," + start_lon
     try:
         if (endpoint_categories):
             for categor in endpoint_categories:
@@ -550,8 +553,10 @@ def calculate_yelp_server_suggestion_for_locations_business_id(start_loc, end_id
                     if q['rating'] >= location_review:
                         #'Coordinates' come out as two elements, latitude and longitude
                         ratings_bus[q['name']] = (q['rating'], q['alias'])
-                        obtained = q['location']['display_address'][0] + q['location']['display_address'][1]
-                        obtained.replace(' ', '+')
+                        obtained_lat = q['coordinates']['latitude'] 
+                        obtained_lon = q['coordinates']['longitude']
+                        obtained = str(obtained_lat) + ',' + str(obtained_lon)
+                        # obtained.replace(' ', '+')
                         business_locations[q['name']] = obtained
         else:
             return ''
@@ -560,7 +565,10 @@ def calculate_yelp_server_suggestion_for_locations_business_id(start_loc, end_id
     for a in business_locations:
         print(a)
         try:
+            print(business_locations[a])
             calculate_distance = distance(start_lat_lon, business_locations[a])
+            print(calculate_distance)
+            print(distance_in_miles)
         except:
             continue
         if calculate_distance < distance_in_miles and calculate_distance < 5 and calculate_distance >= 1:
