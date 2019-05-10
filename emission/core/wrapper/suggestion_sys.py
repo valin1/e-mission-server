@@ -360,11 +360,8 @@ Function that RETURNS distance between addresses
 def distance(address1, address2):
     address1 = address1.replace(' ', '+')
     address2 = address2.replace(' ', '+')
-
     url = 'http://www.mapquestapi.com/directions/v2/route?key=' + MAPQUEST_KEY + '&from=' + address1 + '&to=' + address2
-    print(url)
     response = requests.get(url)
-    print(response)
     return response.json()['route']['distance']
     # except:
     #     url = 'http://www.mapquestapi.com/directions/v2/route?key=' + BACKUP_MAPQUEST_KEY + '&from=' + address1 + '&to=' + address2
@@ -529,8 +526,8 @@ def calculate_yelp_server_suggestion_singletrip_nominatim(uuid, tripidstr):
     return suggestion_result
 
 
-def calculate_yelp_server_suggestion_for_locations_business_id(start_loc, end_id, distance):
-    distance_in_miles = distance * 0.000621371
+def calculate_yelp_server_suggestion_for_locations_business_id(start_loc, end_id, given_distance):
+    distance_in_miles = given_distance * 0.000621371
     start_lat, start_lon = geojson_to_lat_lon_separated(start_loc)
     endpoint_categories = []
     business_locations = {}
@@ -557,18 +554,14 @@ def calculate_yelp_server_suggestion_for_locations_business_id(start_loc, end_id
                         obtained_lon = q['coordinates']['longitude']
                         obtained = str(obtained_lat) + ',' + str(obtained_lon)
                         # obtained.replace(' ', '+')
-                        business_locations[q['name']] = obtained
+                        business_locations[q['alias']] = obtained
         else:
             return ''
     except:
         return ''
     for a in business_locations:
-        print(a)
-        try:
-            print(business_locations[a])
-            calculate_distance = distance(start_lat_lon, business_locations[a])
-            print(calculate_distance)
-            print(distance_in_miles)
+        try:     
+            calculate_distance = distance(str(start_lat_lon), str(business_locations[a]))
         except:
             continue
         if calculate_distance < distance_in_miles and calculate_distance < 5 and calculate_distance >= 1:
