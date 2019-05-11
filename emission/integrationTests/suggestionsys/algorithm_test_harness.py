@@ -55,57 +55,19 @@ def test_find_destination_business(cfn, params, exp_output, noise_in_meters):
             (name, exp_output))
         return False
 
-def test_find_candidates_business(cfn, params, exp_output, noise_in_meters):
-    noisy_loc = add_noise(params["loc"], noise_in_meters)
-    lat, lon = sugg.geojson_to_lat_lon_separated(noisy_loc)
-    result = cfn(lat, lon)
-    name = result
-    # exp_output is a list of valid names
-    for n in name:
-        if n[0] == exp_output[0]:
-            logging.debug("found match! name = %s, comparing with %s" %
-                (n, exp_output))
-            return True
-        else:
-            logging.debug("no match! name = %s, comparing with %s" %
-                (n, exp_output))
-            continue
-    return False
-
-def test_category_of_business_nominatim(cfn, params, exp_output, noise_in_meters):
-    noisy_loc = add_noise(params["loc"], noise_in_meters)
-    lat, lon = sugg.geojson_to_lat_lon_separated(noisy_loc)
-    result = cfn(lat, lon)
-    return exp_output == result
-
 def test_calculate_yelp_server_suggestion_for_locations(cfn, params, exp_output, noise_in_meters):
     noisy_start_loc = add_noise(params["start_loc"], noise_in_meters)
-    # # noisy_end_loc = add_noise(params["end_loc"], noise_in_meters)
-    # noisy_end_business = add_noise(params["end_business"], noise_in_meters)
-    noisy_end_business = params["end_business_id"]
-    # input_end_business = params["end_business"]
-    end_loc_coord = sugg.business_reviews(sugg.YELP_API_KEY, noisy_end_business)['coordinates']
-    end_loc_lat = end_loc_coord['latitude']
-    end_loc_lon = end_loc_coord['longitude']
-
-    noisy_end_loc = {'coordinates': [end_loc_lon, end_loc_lat]}
-    logging.debug("start_coord %s" % noisy_start_loc)
-    distance_in_miles = sugg.distance(
-        sugg.geojson_to_latlon(noisy_start_loc),
-        sugg.geojson_to_latlon(noisy_end_loc))
+    noisy_end_loc = add_noise(params["end_loc"], noise_in_meters)
+    noisy_start_lat, noisy_start_lng = sugg.geojson_to_lat_lon_separated(noisy_start_loc)
+    noisy_end_lat, noisy_end_lng = sugg.geojson_to_lat_lon_separated(noisy_end_loc)
+    distance_in_miles = sugg.distance(noisy_start_lat, noisy_start_lng,
+        noisy_end_lat, noisy_end_lng)
     distance_in_meters = distance_in_miles / 0.000621371
     logging.debug("distance in meters = %s" % distance_in_meters)
     # calculation function expects distance in meters
-    result = cfn(noisy_start_loc, noisy_end_business, distance_in_meters)
-    if result == exp_output:
-        logging.debug("found match! name = %s, comparing with %s" %
-                (result, exp_output))
-        return True
-    else:
-        logging.debug("no match! name = %s, comparing with %s" %
-                (result, exp_output))
-        return False
-    
+    result = cfn(noisy_start_loc, noisy_end_loc, distance_in_meters)
+    return result.get('businessid', None) == exp_output
+
 
 def test_single_instance(test_fn, cfn, instance, noise_in_meters):
     logging.debug("-----" + instance["test_name"] + "------")
@@ -123,9 +85,7 @@ def test_single_instance(test_fn, cfn, instance, noise_in_meters):
 
 TEST_WRAPPER_MAP = {
     "find_destination_business": test_find_destination_business,
-    "category_of_business_nominatim": test_category_of_business_nominatim,
-    "calculate_yelp_server_suggestion_for_locations": test_calculate_yelp_server_suggestion_for_locations,
-    "find_candidate_business": test_find_candidates_business
+    "calculate_yelp_server_suggestion_for_locations": test_calculate_yelp_server_suggestion_for_locations
 }
 
 CANDIDATE_ALGORITHMS = {
@@ -134,12 +94,6 @@ CANDIDATE_ALGORITHMS = {
         sugg.find_destination_business_yelp,
         sugg.find_destination_business_nominatim,
         sugg.find_destination_business
-    ],
-    "category_of_business_nominatim": [
-        sugg.category_of_business_nominatim,
-        sugg.category_from_name_wrapper,
-        sugg.category_from_address_wrapper,
-        sugg.category_of_business_awesome
     ],
     "calculate_yelp_server_suggestion_for_locations": [
         sugg.calculate_yelp_server_suggestion_for_locations_business_id
