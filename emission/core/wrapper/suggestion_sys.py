@@ -426,7 +426,7 @@ def calculate_yelp_server_suggestion_for_locations_business_id(start_loc, end_id
     start_lat, start_lon = geojson_to_lat_lon_separated(start_loc)
     endpoint_categories = []
     business_locations = {}
-    yelp_call = business_reviews(YELP_API_KEY, end_id)
+    yelp_call = business_details(YELP_API_KEY, end_id)
     categories_dict = yelp_call['categories']
     for c in categories_dict:
         endpoint_categories.append(c['alias'])
