@@ -273,6 +273,8 @@ def distance(start_lat, start_lon, end_lat, end_lon):
     response = requests.get(url)
     response_json = response.json()
 #     logging.debug("mapquest response = %s " % response_json)
+    print("distance")
+    print(response_json['route']['distance'])
     return response_json['route']['distance']
     # except:
     #     url = 'http://www.mapquestapi.com/directions/v2/route?key=' + BACKUP_MAPQUEST_KEY + '&from=' + address1 + '&to=' + address2
@@ -449,15 +451,16 @@ def calculate_yelp_server_suggestion_for_locations_business_id(start_loc, end_id
                         obtained_lon = q['coordinates']['longitude']
                         obtained = str(obtained_lat) + ',' + str(obtained_lon)
                         # obtained.replace(' ', '+')
-                        business_locations[q['alias']] = obtained
+                        business_locations[q['alias']] = (obtained_lat, obtained_lon)
         else:
             return ''
     except:
         return ''
     for a in business_locations:
         try:     
-            calculate_distance = distance(str(start_lat_lon), str(business_locations[a]))
+            calculate_distance = distance(str(start_lat), str(start_lon), str(business_locations[a][0]), str(business_locations[a][1]))
         except:
+            print("did it go here")
             continue
         if calculate_distance < distance_in_miles and calculate_distance < 5 and calculate_distance >= 1:
             try:

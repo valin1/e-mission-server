@@ -35,7 +35,7 @@
             },
             "end_business_id": "jong-ga-house-oakland"
         },  
-        "output": "koja-kitchen-berkeley-2"
+        "output": "ohgane-korean-restaurant-oakland"
     }
 ,
     {
@@ -48,7 +48,7 @@
             },
             "end_business_id": "tpumps-san-francisco"
         },
-        "output": "yifang-taiwan-fruit-tea-berkeley-4"
+        "output": "four-barrel-coffee-san-francisco"
     }
 ,
     {
@@ -100,7 +100,7 @@
             },
             "end_business_id": "pho-k-and-k-berkeley"
         },
-        "output": "cafe-bunn-mi-san-francisco"
+        "output": "le-pho-berkeley-6"
     }
 ,
     {
@@ -269,7 +269,7 @@
             },
             "end_business_id": "petaluma-community-acupuncture-petaluma"
         },
-        "output": "golden-leaf-acupuncture-berkeley-2"
+        "output": ""
     }
 ,
     {
@@ -295,7 +295,7 @@
             },
             "end_business_id": "jang-su-jang-milpitas-3"
         },
-        "output": "gen-korean-bbq-house-milpitas-3"
+        "output": "pinoy-bbq-atbp-milpitas"
     }
 ,
     {
@@ -482,7 +482,7 @@
             },
             "end_business_id" : "chase-bank-northbrook-2"
         },
-        "output": "pnc-bank-chicago-46"
+        "output": ""
     }
 ,
     {
@@ -497,19 +497,5 @@
         },
         "output": "sunset-foods-northbrook"
     }
-,
-    {
-        "test_name": "Trader Joe's in Lincoln Park -> The end of my cul-de-sac in Northbrook",
-        "test_type": "From a Trader Joe's in Chicago to near my home",
-        "input": {
-            "start_loc": {
-                "coordinates": [-87.6549993, 41.9145533],
-                "type": "Point"
-            },
-            "end_business_id": ""
-        },
-        "output": ""
-    }
-
 
 ]
