@@ -437,7 +437,7 @@ def calculate_yelp_server_suggestion_for_locations_business_id(start_loc, end_id
     ratings_bus = {}
     error_message = 'Sorry, unable to retrieve datapoint'
     error_message_categor = 'Sorry, unable to retrieve datapoint because datapoint is a house or datapoint does not belong in service categories'
-    print(endpoint_categories)
+
     start_lat_lon = start_lat + "," + start_lon
     try:
         if (endpoint_categories):
@@ -460,7 +460,6 @@ def calculate_yelp_server_suggestion_for_locations_business_id(start_loc, end_id
         try:     
             calculate_distance = distance(str(start_lat), str(start_lon), str(business_locations[a][0]), str(business_locations[a][1]))
         except:
-            print("did it go here")
             continue
         if calculate_distance < distance_in_miles and calculate_distance < 5 and calculate_distance >= 1:
             try:

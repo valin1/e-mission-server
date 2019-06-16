@@ -22,7 +22,7 @@
             },
             "end_business_id": "the-italian-homemade-company-berkeley-3"
         },
-        "output": "gypsys-trattoria-italiano-berkeley"
+        "output": "gypsys-trattoria-italiano-berkeley-2"
     }
 ,
     {
@@ -74,7 +74,7 @@
             },
             "end_business_id": "san-francisco-international-airport-sfo-san-francisco-3"
         },
-        "output": "oakland-international-airport-oakland-8"
+        "output": ""
     }
 ,
     {
@@ -113,7 +113,7 @@
             },
             "end_business_id": "home-san-francisco-28"   
         },
-        "output": "schuberts-bakery-san-francisco"
+        "output": "rise-and-grind-coffee-and-tea-san-francisco"
     }
 ,
     {
@@ -152,7 +152,7 @@
             },
             "end_business_id": "novato-unified-school-district-novato"
         },
-        "output": "willard-middle-school-berkeley"
+        "output": ""
     }
 ,
    {
@@ -230,7 +230,7 @@
             },
             "end_business_id": "play-and-learn-pre-school-petaluma"
         },
-        "output": "joyce-newton-the-beginning-family-daycare-berkeley"
+        "output": ""
     }
 ,
     {
@@ -334,7 +334,7 @@
             },
             "end_business_id": "t4-milpitas"
         },
-        "output": "i-tea-milpitas"
+        "output": "kokoro-ramen-milpitas"
     }
 , 
     {
@@ -402,7 +402,7 @@
             
         
         },
-        "output": "butterfields-pancake-house-and-restaurant-northbrook"
+        "output": "lou-malnatis-pizzeria-northbrook-2"
     }
 ,
     {
@@ -443,7 +443,7 @@
             },
             "end_business_id": "jimmy-johns-evanston"
         },
-        "output": "patisserie-coralie-evanston"
+        "output": "soulwich-evanston"
     }
 ,
     {
